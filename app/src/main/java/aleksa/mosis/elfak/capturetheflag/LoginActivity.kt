@@ -49,6 +49,10 @@ class LoginActivity : AppCompatActivity() {
                         })
                 }
             }
+
+        }
+        textView_register_here.setOnClickListener(){
+            startActivity(Intent(this@LoginActivity,RegisterActivity::class.java))
         }
     }
 }
