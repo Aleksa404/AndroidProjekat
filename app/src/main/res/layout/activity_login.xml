@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".LoginActivity">
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/image_view_background"
+        android:src="@drawable/background"
+        android:scaleType="centerCrop"
+        tools:ignore="MissingConstraints">
+    </ImageView>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -77,5 +86,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/til_login_password"
         />
+    <TextView
+        android:id="@+id/textView_register_here"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Do not have an account ? Register Here"
+        android:textColor="#C6FF00"
+        app:layout_constraintBottom_toBottomOf="@+id/image_view_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_login"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
