@@ -1,7 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
 import android.content.Intent
-import android.nfc.Tag
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
@@ -36,6 +35,8 @@ class RegisterActivity : AppCompatActivity() {
                 else -> {
                     val email: String = et_register_email.text.toString().trim { it <= ' '}
                     val password: String = et_register_password.text.toString().trim { it <= ' '}
+                    val username = et_register_name.text.toString()
+
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(OnCompleteListener { task ->
                             if (task.isSuccessful) {
@@ -47,10 +48,14 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-//                                val documentReference : DocumentReference = getInstance().collection("users")
-//                                    .document(firebaseUser.uid)
-//                                val user : HashMap<String, Any> = HashMap()
-//                                user.put("Name", et_register_name.text.toString())
+                                val user : User = User(firebaseUser.uid, username, email)
+
+                                val documentReference  = getInstance().collection("users")
+                                    .document(firebaseUser.uid).set(user)
+
+
+//                                val users : HashMap<String, Any> = HashMap()
+//                                user.put("Name", user)
 //                                documentReference.set(user).addOnSuccessListener {
 //                                    Toast.makeText(
 //                                        this@RegisterActivity, "Created user with id: "+firebaseUser.uid, Toast.LENGTH_SHORT)
