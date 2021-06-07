@@ -11,6 +11,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        btn_new_game.setOnClickListener {
+
+            val intent = Intent(this@MainActivity, NewGameActivity::class.java)
+            startActivity(intent)
+
+        }
+        btn_join_game.setOnClickListener {
+        //TODO
+
+
+        }
+        btn_find_firends.setOnClickListener {
+        //TODO
+        }
 
         btn_logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
