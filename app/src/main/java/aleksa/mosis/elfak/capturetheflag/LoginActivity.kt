@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
                                 Toast.makeText(this@LoginActivity,"you were logged in Successfully.",
                                     Toast.LENGTH_SHORT).show()
 
-                                val intent = Intent(this@LoginActivity,MainActivity::class.java)
+                                val intent = Intent(this@LoginActivity,ProfileActivity::class.java)
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 intent.putExtra("user_id", firebaseUser.uid)
                                 intent.putExtra("email_id", email)

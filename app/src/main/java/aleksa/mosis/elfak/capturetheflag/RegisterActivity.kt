@@ -35,7 +35,11 @@ class RegisterActivity : AppCompatActivity() {
                 else -> {
                     val email: String = et_register_email.text.toString().trim { it <= ' '}
                     val password: String = et_register_password.text.toString().trim { it <= ' '}
-                    val username = et_register_name.text.toString()
+                    val username = et_register_username.text.toString()
+                    val name = et_register_name.text.toString()
+                    val surname = et_register_surname.text.toString()
+                    val phone = et_register_phone.text.toString()
+
 
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(OnCompleteListener { task ->
@@ -48,7 +52,7 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                val user : User = User(firebaseUser.uid, username, email)
+                                val user : User = User(firebaseUser.uid, username, email, name, surname, phone)
 
                                 val documentReference  = getInstance().collection("users")
                                     .document(firebaseUser.uid).set(user)
