@@ -8,9 +8,23 @@ import android.widget.Toast
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
+
+    private var user : FirebaseUser? = null
+
+
+    override  fun onStart(){
+        super.onStart()
+        user = Firebase.auth.currentUser
+        if(user != null){
+            goToHomePage(user!!)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -51,8 +65,16 @@ class LoginActivity : AppCompatActivity() {
             }
 
         }
-        textView_register_here.setOnClickListener(){
+        textView_register_here.setOnClickListener {
             startActivity(Intent(this@LoginActivity,RegisterActivity::class.java))
+        }
+
+    }
+
+     private fun goToHomePage(user : FirebaseUser){
+        if(user!=null){
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+            finish()
         }
     }
 }
