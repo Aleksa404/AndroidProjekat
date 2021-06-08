@@ -1,19 +1,27 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import java.io.StringBufferInputStream
+
 data class User(var id : String,
                 var username: String,
-                var email : String
-)
+                var email : String,
+                var name: String,
+                var surname: String,
+                var phone: String
+                )
 {
-    var wins : Int = 0
-    var loses : Int = 0
-    var score : Int = 0
+    var matches : Int = 0
+    var won : Int = 0
+    var flags : Int = 0
     var friends : List<User>? = null
 
     fun addWin() {
-        wins++
+        won++
     }
-    fun addLose(){
-        loses++
+    fun addMatch() {
+        matches++
+    }
+    fun addFlag(){
+        flags++
     }
 }
