@@ -14,14 +14,15 @@ import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
 
-    private var user : FirebaseUser? = null
-
+    private lateinit var auth: FirebaseAuth
 
     override  fun onStart(){
         super.onStart()
-        user = Firebase.auth.currentUser
-        if(user != null){
-            goToHomePage(user!!)
+
+        auth = Firebase.auth
+        val currentUser = auth.currentUser
+        if(currentUser != null){
+            goToHomePage(currentUser)
         }
     }
 
@@ -49,7 +50,7 @@ class LoginActivity : AppCompatActivity() {
                                 Toast.makeText(this@LoginActivity,"you were logged in Successfully.",
                                     Toast.LENGTH_SHORT).show()
 
-                                val intent = Intent(this@LoginActivity,ProfileActivity::class.java)
+                                val intent = Intent(this@LoginActivity,MainActivity::class.java)
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 intent.putExtra("user_id", firebaseUser.uid)
                                 intent.putExtra("email_id", email)
@@ -71,8 +72,8 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-     private fun goToHomePage(user : FirebaseUser){
-        if(user!=null){
+     private fun goToHomePage(user : FirebaseUser?){
+        if(user != null){
             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
             finish()
         }

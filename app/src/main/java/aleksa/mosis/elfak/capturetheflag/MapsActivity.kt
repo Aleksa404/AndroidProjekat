@@ -9,10 +9,76 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.clustering.ClusterManager
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    inner class MyItem(
+        lat: Double,
+        lng: Double,
+        title: String,
+        snippet: String
+    ) : ClusterItem {
+
+        private val position: LatLng
+        private val title: String
+        private val snippet: String
+
+        override fun getPosition(): LatLng {
+            return position
+        }
+
+        override fun getTitle(): String? {
+            return title
+        }
+
+        override fun getSnippet(): String? {
+            return snippet
+        }
+
+        init {
+            position = LatLng(lat, lng)
+            this.title = title
+            this.snippet = snippet
+        }
+    }
+    private lateinit var clusterManager: ClusterManager<MyItem>
     private lateinit var mMap: GoogleMap
+
+    private fun setUpClusterer() {
+        // Position the map.
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(51.503186, -0.126446), 10f))
+
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        clusterManager = ClusterManager(this, mMap)
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setOnCameraIdleListener(clusterManager)
+        mMap.setOnMarkerClickListener(clusterManager)
+
+        // Add cluster items (markers) to the cluster manager.
+        addItems()
+    }
+    private fun addItems() {
+
+        // Set some lat/lng coordinates to start with.
+        var lat = 51.5145160
+        var lng = -0.1270060
+
+        // Add ten cluster items in close proximity, for purposes of this example.
+        for (i in 0..9) {
+            val offset = i / 60.0
+            lat += offset
+            lng += offset
+            val offsetItem =
+                MyItem(lat, lng, "Title $i", "Snippet $i")
+            clusterManager.addItem(offsetItem)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +101,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        setUpClusterer()
     }
 }

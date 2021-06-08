@@ -1,10 +1,15 @@
 package aleksa.mosis.elfak.capturetheflag
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -16,7 +21,7 @@ import kotlin.collections.HashMap
 
 
 class RegisterActivity : AppCompatActivity() {
-//    var db = getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -66,6 +71,9 @@ class RegisterActivity : AppCompatActivity() {
 //                                        .show()
 //                                }
 
+
+
+
                                 val intent = Intent(this@RegisterActivity, MainActivity::class.java)
                                 intent.flags =
                                     Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -88,4 +96,5 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
         }
     }
+
 }

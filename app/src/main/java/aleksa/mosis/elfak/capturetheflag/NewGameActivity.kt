@@ -1,8 +1,12 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils.replace
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -43,6 +47,18 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
+
+    private val STORAGE_RQ = 102
+
+    private fun requestPermission(permission: String, name : String, requestCode : Int){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(
+                ContextCompat.checkSelfPermission(applicationContext, permission) == PackageManager.PERMISSION_DENIED ) {
+                ActivityCompat.requestPermissions(this, arrayOf(permission), requestCode)
+            }
+
+        }
     }
 }
 
