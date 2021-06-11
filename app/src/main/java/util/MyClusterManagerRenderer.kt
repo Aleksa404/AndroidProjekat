@@ -1,4 +1,3 @@
-import aleksa.mosis.elfak.capturetheflag.ClusterPerson
 import android.R
 import android.content.Context
 import android.view.ViewGroup
@@ -30,24 +29,24 @@ class MyClusterManagerRenderer(
      * @param markerOptions
      */
     override fun onBeforeClusterItemRendered(item: ClusterPerson, markerOptions: MarkerOptions) {
-        imageView.setImageResource(item.getIconPicture())
+        imageView.setImageResource(item.iconPicture)
         val icon = iconGenerator.makeIcon()
-        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon)).title(item.getTitle())
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon)).title(item.title)
     }
 
-    protected override fun shouldRenderAsCluster(cluster: Cluster<*>?): Boolean {
-        return false
-    }
+//    protected override fun shouldRenderAsCluster(cluster: Cluster<ClusterPerson>?): Boolean {
+//        return false
+//    }
 
     init {
 
         // initialize cluster item icon generator
         iconGenerator = IconGenerator(context.applicationContext)
         imageView = ImageView(context.applicationContext)
-        markerWidth = context.resources.getDimension(R.dimen.custom_marker_image).toInt()
-        markerHeight = context.resources.getDimension(R.dimen.custom_marker_image).toInt()
+        markerWidth = context.resources.getDimension(R.dimen.app_icon_size).toInt()
+        markerHeight = context.resources.getDimension(R.dimen.app_icon_size).toInt()
         imageView.setLayoutParams(ViewGroup.LayoutParams(markerWidth, markerHeight))
-        val padding = context.resources.getDimension(R.dimen.custom_marker_padding).toInt()
+        val padding = context.resources.getDimension(R.dimen.app_icon_size).toInt()
         imageView.setPadding(padding, padding, padding, padding)
         iconGenerator.setContentView(imageView)
     }

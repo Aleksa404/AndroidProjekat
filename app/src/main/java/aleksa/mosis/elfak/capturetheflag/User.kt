@@ -1,6 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
-import java.io.StringBufferInputStream
+
 
 data class User(var id : String,
                 var username: String,

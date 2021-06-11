@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         }
         btn_find_firends.setOnClickListener {
-        //TODO
+            startActivity(Intent(this,FindFriendsActivity::class.java))
         }
 
         btn_logout.setOnClickListener {

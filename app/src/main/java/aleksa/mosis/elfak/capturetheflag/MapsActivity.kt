@@ -1,5 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import ClusterPerson
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
@@ -16,8 +17,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
-import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -25,6 +26,8 @@ import kotlinx.android.synthetic.main.activity_maps.*
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
 
 
+    private val mUserList: ArrayList<User> = ArrayList()
+//    private val mUserLocations: ArrayList<UserLocation> = ArrayList()
 
 //    private lateinit var currentLocation: Location
     private lateinit var lastLocation : Location
@@ -62,8 +65,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
             val distance = minDistance + Math.random() * maxDistance
             val heading = Math.random() * 360 - 180
             val position = SphericalUtil.computeOffset(center, distance, heading)
-            val marker = ClusterMarker(MarkerOptions().position(position).title("Item No. $i"))
-            manager.addItem(marker)
+//            val marker = ClusterMarker(MarkerOptions().position(position).title("Item No. $i"))
+//            manager.addItem(marker)
             minLat = Math.min(minLat, position.latitude)
             minLon = Math.min(minLon, position.longitude)
             maxLat = Math.max(maxLat, position.latitude)
@@ -85,9 +88,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
             val offset = i / 60.0
             lat += offset
             lng += offset
-            val offsetItem =
-                ClusterPerson(lat, lng, "Title $i", "Snippet $i")
-            clusterManager.addItem(offsetItem)
+            var latLng =LatLng(lat,lng)
+//            val offsetItem =
+//                ClusterPerson(latLng, "Title $i", "Snippet $i",)
+//            clusterManager.addItem(offsetItem)
         }
     }
 
@@ -113,6 +117,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
         fusedLocationProviderClient?.lastLocation!!.addOnCompleteListener(this) { task ->
             if (task.isSuccessful && task.result != null) {
                 lastLocation = task.result
+                var GeoPoint = GeoPoint(lastLocation.latitude,lastLocation.longitude)
                 //what to do on map
                 Toast.makeText(this,lastLocation.longitude.toString(), Toast.LENGTH_SHORT).show()
             }
