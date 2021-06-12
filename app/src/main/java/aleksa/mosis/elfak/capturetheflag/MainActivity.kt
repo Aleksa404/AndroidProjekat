@@ -51,6 +51,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
         }
+        btn_leaderboard.setOnClickListener {
+            startActivity(Intent(this@MainActivity, LeaderboardActivity::class.java))
+        }
 
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

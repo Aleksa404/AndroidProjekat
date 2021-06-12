@@ -9,9 +9,17 @@ import android.content.ContentValues.TAG
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_find_friends.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -92,6 +100,7 @@ class FindFriendsActivity : AppCompatActivity() {
         select_device_refresh.setOnClickListener {
             bluetoothAdapter!!.startDiscovery()
 
+
         }
 
 
@@ -108,6 +117,7 @@ class FindFriendsActivity : AppCompatActivity() {
 
 
             btDevicePaired = devices[position]
+            btDevicePaired.let {  }
             startBtConnection(btDevicePaired!!, uuid)
 
             Log.d(TAG, btDevicePaired!!.name)
@@ -206,16 +216,48 @@ class FindFriendsActivity : AppCompatActivity() {
 
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.menuProfile){
+            startActivity(Intent(this,ProfileActivity::class.java))
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     private fun startBtConnection(device: BluetoothDevice,uuid: UUID){
+
         startClient(device, uuid)
     }
 
 
     private fun startClient(device: BluetoothDevice, uuid: UUID){
         Log.d(TAG, "start client: STARTED")
+        var user = Firebase.auth.currentUser as FirebaseUser
 
-        bluetoothService.mConnectThread = bluetoothService.ConnectThread(device)
+
+
+
+
+        bluetoothService.mConnectThread = bluetoothService.ConnectThread(device, user.uid)
         bluetoothService.mConnectThread?.start()
+
+    }
+    private fun showDialog(permission: String, name : String, requestCode: Int){
+        var builder = AlertDialog.Builder(this)
+
+        builder.apply {
+            setMessage("Permission to access your $name is required to use this app")
+            setTitle("Permission required")
+            setPositiveButton("OK") { dialog, which ->
+                ActivityCompat.requestPermissions(this@FindFriendsActivity, arrayOf(permission), requestCode)
+            }
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 }
