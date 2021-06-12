@@ -105,11 +105,14 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
         else if(requestCode == 2000){
-            text_view_username.setText(data?.getStringExtra("username").toString())
-            text_view_name.setText(data?.getStringExtra("name").toString())
-            text_view_surname.setText(data?.getStringExtra("surname").toString())
-            text_view_phone.setText(data?.getStringExtra("phone").toString())
-            updateProfileInfo()
+            if(resultCode!= RESULT_CANCELED) { //Ako si stiso save dugme
+                text_view_username.setText(data?.getStringExtra("username").toString())
+                text_view_name.setText(data?.getStringExtra("name").toString())
+                text_view_surname.setText(data?.getStringExtra("surname").toString())
+                text_view_phone.setText(data?.getStringExtra("phone").toString())
+                updateProfileInfo()
+            }
+            //Ako si backovao
         }
 
     }
