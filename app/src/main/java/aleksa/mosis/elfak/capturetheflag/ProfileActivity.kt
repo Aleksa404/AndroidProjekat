@@ -6,8 +6,11 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import com.bumptech.glide.Glide
 import com.bumptech.glide.Glide.with
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -42,7 +45,6 @@ class ProfileActivity : AppCompatActivity() {
              spaceRef = storageRef.child("images/"+user.uid.toString())
              val docRef = getInstance().collection("users").document(user.uid)
              docRef.get().addOnSuccessListener { documentSnapshot ->
-//                 val userObj = documentSnapshot.toObject<User>()
                  text_view_username.setText(documentSnapshot.getString("username"))
                  text_view_name.setText(documentSnapshot.getString("name"))
                  text_view_surname.setText(documentSnapshot.getString("surname"))
@@ -51,30 +53,15 @@ class ProfileActivity : AppCompatActivity() {
                  text_view_matches.setText(documentSnapshot.getLong("matches").toString())
                  text_view_flags.setText(documentSnapshot.getLong("flags").toString())
                  text_view_won.setText(documentSnapshot.getLong("won").toString())
-                 if(user.photoUrl != null) {
-
-                     Toast.makeText(this@ProfileActivity, "IMAS PHOTO.URI",
-                         Toast.LENGTH_LONG).show()
-                     var task = storageRef.child("images/"+user.uid.toString()).downloadUrl.addOnCompleteListener { task ->
+                 var task = storageRef.child("images/"+user.uid.toString()).downloadUrl.addOnCompleteListener{ task ->
                          if (task.isSuccessful) {
-                             Toast.makeText(this@ProfileActivity, "TASK USPESAN",
-                                 Toast.LENGTH_LONG).show()
                              val downloadUri = task.result
-                             Log.d("POCETAK "+ user.photoUrl.toString() + " KRAJ", "onCreate: d)")
-                             profile_image.setImageURI(null)
-//                             profile_image.setImageURI(downloadUri)
-                             with(this).load(downloadUri).centerCrop().override(512, 512).into(profile_image);
+                             Glide.with(this).load(downloadUri).centerCrop().override(512, 512).into(profile_image);
                          } else {
-                             // Handle failures
-                             Toast.makeText(this@ProfileActivity, "TASK NEUSPESAN",
+                             Toast.makeText(this@ProfileActivity, "Couldn't find image",
                                  Toast.LENGTH_LONG).show()
-                             // ...
+                             profile_image.setImageURI(Uri.parse("android.resource://$packageName/${R.drawable.profile_icon}"))
                          }
-                     }
-                 }else{
-                     Toast.makeText(this@ProfileActivity, "NEMAS PHOTO.URI",
-                         Toast.LENGTH_LONG).show()
-                     profile_image.setImageURI(Uri.parse("android.resource://$packageName/${R.drawable.profile_icon}"))
                  }
              }
 
@@ -85,49 +72,54 @@ class ProfileActivity : AppCompatActivity() {
             intent.type = "image/*"
             startActivityForResult(intent, 1000)
         }
+
+        btn_edit.setOnClickListener{
+            val intent = Intent(this@ProfileActivity, EditProfileActivity::class.java)
+
+            intent.putExtra("username",text_view_username.text.toString())
+            intent.putExtra("name",text_view_name.text.toString())
+            intent.putExtra("surname",text_view_surname.text.toString())
+            intent.putExtra("phone",text_view_phone.text.toString())
+
+            startActivityForResult(intent, 2000)
+        }
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1000){
-            profile_image.setImageURI(data?.data) // handle chosen image
-            updateProfile(data?.data)
+            profile_image.setImageURI(data?.data)
+            profile_image.getLayoutParams().height = 512;
+            profile_image.getLayoutParams().width = 512;
+            profile_image.scaleType=ImageView.ScaleType.CENTER_CROP
+
             profile_image.isDrawingCacheEnabled = true
             profile_image.buildDrawingCache()
             val bitmap = (profile_image.drawable as BitmapDrawable).bitmap
             val baos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val data = baos.toByteArray()
-
             var uploadTask = spaceRef?.putBytes(data)
             uploadTask?.addOnFailureListener {
-                // Handle unsuccessful uploads
-            }?.addOnSuccessListener { taskSnapshot ->
-                // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
-                // ...
+                Toast.makeText(this@ProfileActivity, "Image did not upload",
+                    Toast.LENGTH_LONG).show()
             }
         }
+        else if(requestCode == 2000){
+            text_view_username.setText(data?.getStringExtra("username").toString())
+            text_view_name.setText(data?.getStringExtra("name").toString())
+            text_view_surname.setText(data?.getStringExtra("surname").toString())
+            text_view_phone.setText(data?.getStringExtra("phone").toString())
+            updateProfileInfo()
+        }
+
     }
-    private fun updateProfile(img : android.net.Uri?) {
-        user?.let { user ->
-            val photoURI = img
-            val profileUpdates = UserProfileChangeRequest.Builder()
-                    .setPhotoUri(photoURI)
-                    .build()
+    private fun updateProfileInfo() {
+        val obj = User(user.uid, text_view_username.text.toString(), text_view_email.text.toString(), text_view_name.text.toString(), text_view_surname.text.toString(), text_view_phone.text.toString())
+        obj.matches = text_view_matches.text.toString().toInt()
+        obj.won = text_view_won.text.toString().toInt()
+        obj.flags = text_view_flags.text.toString().toInt()
+        obj.addFlag()
+        getInstance().collection("users").document(user.uid).set(obj)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    user.updateProfile(profileUpdates).await()
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ProfileActivity, "Successfully updated profile",
-                                Toast.LENGTH_LONG).show()
-                    }
-                } catch(e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ProfileActivity, e.message, Toast.LENGTH_LONG).show()
-                    }
-                }
-
-            }
-        }
     }
 }
