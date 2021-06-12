@@ -1,49 +1,39 @@
 package aleksa.mosis.elfak.capturetheflag
 
-import androidx.appcompat.app.AppCompatActivity
+import ClusterPerson
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
-
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.clustering.ClusterItem
+import com.google.firebase.firestore.GeoPoint
+import com.google.maps.android.SphericalUtil
 import com.google.maps.android.clustering.ClusterManager
+import kotlinx.android.synthetic.main.activity_maps.*
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    inner class MyItem(
-        lat: Double,
-        lng: Double,
-        title: String,
-        snippet: String
-    ) : ClusterItem {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
 
-        private val position: LatLng
-        private val title: String
-        private val snippet: String
 
-        override fun getPosition(): LatLng {
-            return position
-        }
+    private val mUserList: ArrayList<User> = ArrayList()
+//    private val mUserLocations: ArrayList<UserLocation> = ArrayList()
 
-        override fun getTitle(): String? {
-            return title
-        }
+//    private lateinit var currentLocation: Location
+    private lateinit var lastLocation : Location
+    private var fusedLocationProviderClient: FusedLocationProviderClient? = null
 
-        override fun getSnippet(): String? {
-            return snippet
-        }
-
-        init {
-            position = LatLng(lat, lng)
-            this.title = title
-            this.snippet = snippet
-        }
-    }
-    private lateinit var clusterManager: ClusterManager<MyItem>
+    private lateinit var clusterManager: ClusterManager<ClusterPerson>
     private lateinit var mMap: GoogleMap
 
     private fun setUpClusterer() {
@@ -62,6 +52,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add cluster items (markers) to the cluster manager.
         addItems()
     }
+
+    private fun loadMarkers(
+        manager: ClusterManager<ClusterPerson>, map: GoogleMap, center: LatLng, count: Int,
+        minDistance: Double, maxDistance: Double
+    ) {
+        var minLat = Double.MAX_VALUE
+        var maxLat = Double.MIN_VALUE
+        var minLon = Double.MAX_VALUE
+        var maxLon = Double.MIN_VALUE
+        for (i in 0 until count) {
+            val distance = minDistance + Math.random() * maxDistance
+            val heading = Math.random() * 360 - 180
+            val position = SphericalUtil.computeOffset(center, distance, heading)
+//            val marker = ClusterMarker(MarkerOptions().position(position).title("Item No. $i"))
+//            manager.addItem(marker)
+            minLat = Math.min(minLat, position.latitude)
+            minLon = Math.min(minLon, position.longitude)
+            maxLat = Math.max(maxLat, position.latitude)
+            maxLon = Math.max(maxLon, position.longitude)
+        }
+        val min = LatLng(minLat, minLon)
+        val max = LatLng(maxLat, maxLon)
+        val bounds = LatLngBounds(min, max)
+        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+    }
     private fun addItems() {
 
         // Set some lat/lng coordinates to start with.
@@ -73,9 +88,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val offset = i / 60.0
             lat += offset
             lng += offset
-            val offsetItem =
-                MyItem(lat, lng, "Title $i", "Snippet $i")
-            clusterManager.addItem(offsetItem)
+            var latLng =LatLng(lat,lng)
+//            val offsetItem =
+//                ClusterPerson(latLng, "Title $i", "Snippet $i",)
+//            clusterManager.addItem(offsetItem)
         }
     }
 
@@ -87,7 +103,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
+
     }
+
+    override fun onStart() {
+        super.onStart()
+        getLastLocation()
+    }
+    private fun getLastLocation() {
+        fusedLocationProviderClient?.lastLocation!!.addOnCompleteListener(this) { task ->
+            if (task.isSuccessful && task.result != null) {
+                lastLocation = task.result
+                var GeoPoint = GeoPoint(lastLocation.latitude,lastLocation.longitude)
+                //what to do on map
+                Toast.makeText(this,lastLocation.longitude.toString(), Toast.LENGTH_SHORT).show()
+            }
+
+        }
+    }
+//    private fun fetchLocation() {
+//
+//        val task = fusedLocationProviderClient.lastLocation
+//        task.addOnSuccessListener { location ->
+//            if (location != null) {
+//                currentLocation = location
+//                Toast.makeText(
+//                    applicationContext, currentLocation.latitude.toString() + "" +
+//                            currentLocation.longitude, Toast.LENGTH_SHORT
+//                ).show()
+//
+//            }
+//        }
+//    }
 
     /**
      * Manipulates the map once available.
@@ -102,5 +152,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         setUpClusterer()
+        enableMyLocation()
+//
+//
+//
+//        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+//        val markerOptions = MarkerOptions().position(latLng).title("I am here!")
+//        googleMap?.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+//        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5f))
+//        googleMap?.addMarker(markerOptions)
     }
+
+    //Permissions
+    private val REQUEST_LOCATION_PERMISSION = 1
+
+    private fun enableMyLocation() {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED)
+             {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_LOCATION_PERMISSION
+                )
+                return
+            }
+        else {
+                mMap.isMyLocationEnabled = true
+        }
+    }
+
 }
