@@ -119,8 +119,8 @@ class ProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1000){
             profile_image.setImageURI(data?.data)
-            profile_image.getLayoutParams().height = 512;
-            profile_image.getLayoutParams().width = 512;
+            profile_image.layoutParams.height = 512;
+            profile_image.layoutParams.width = 512;
             profile_image.scaleType=ImageView.ScaleType.CENTER_CROP
 
             profile_image.isDrawingCacheEnabled = true
@@ -144,10 +144,10 @@ class ProfileActivity : AppCompatActivity() {
         }
         else if(requestCode == 2000){
             if(resultCode!= RESULT_CANCELED) { //Ako si stiso save dugme
-                text_view_username.setText(data?.getStringExtra("username").toString())
-                text_view_name.setText(data?.getStringExtra("name").toString())
-                text_view_surname.setText(data?.getStringExtra("surname").toString())
-                text_view_phone.setText(data?.getStringExtra("phone").toString())
+                text_view_username.text = data?.getStringExtra("username").toString()
+                text_view_name.text = data?.getStringExtra("name").toString()
+                text_view_surname.text = data?.getStringExtra("surname").toString()
+                text_view_phone.text = data?.getStringExtra("phone").toString()
                 updateProfileInfo()
             }
             //Ako si backovao
@@ -175,7 +175,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun saveUri() {
-            storageRef.child("images/" + user.uid.toString()).downloadUrl.addOnCompleteListener { task ->
+            storageRef.child("images/" + user.uid).downloadUrl.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val downloadUri = task.result.toString()
                     getInstance().collection("users").document(user.uid)
