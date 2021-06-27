@@ -57,7 +57,7 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                val user : User = User(firebaseUser.uid, username, email, name, surname, phone)
+                                val user : User = User( id = firebaseUser.uid, username = username, email = email, name = name, surname = surname,phone = phone)
 
                                 val documentReference  = getInstance().collection("users")
                                     .document(firebaseUser.uid).set(user)

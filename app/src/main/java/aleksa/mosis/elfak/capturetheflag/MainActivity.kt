@@ -1,10 +1,16 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import aleksa.mosis.elfak.capturetheflag.leaderboard.LeaderboardActivity
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -12,19 +18,33 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore.getInstance
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.jar.Manifest
+import kotlinx.android.synthetic.main.activity_profile.*
 
 class MainActivity : AppCompatActivity() {
+
+    var user : FirebaseUser? = FirebaseAuth.getInstance().currentUser
+
+    var storage = Firebase.storage
+    var storageRef = storage.reference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         //check permissions
 
         requestPermission(android.Manifest.permission.ACCESS_FINE_LOCATION, "Location", FINE_LOCATION_RQ)
-        requestPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE, "Storage", STORAGE_RQ)
+
 
         btn_new_game.setOnClickListener {
 
@@ -55,10 +75,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity, LeaderboardActivity::class.java))
         }
 
+
+
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
+
         return true
     }
 
@@ -71,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private val FINE_LOCATION_RQ = 101
-    private val STORAGE_RQ = 102
+
 
     private fun requestPermission(permission: String, name : String, requestCode : Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

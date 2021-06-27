@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.*
 import android.content.ContentValues.TAG
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +18,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -118,7 +120,9 @@ class FindFriendsActivity : AppCompatActivity() {
 
             btDevicePaired = devices[position]
             btDevicePaired.let {  }
-            startBtConnection(btDevicePaired!!, uuid)
+
+            showDialog(btDevicePaired!!, uuid)
+
 
             Log.d(TAG, btDevicePaired!!.name)
 
@@ -247,17 +251,25 @@ class FindFriendsActivity : AppCompatActivity() {
         bluetoothService.mConnectThread?.start()
 
     }
-    private fun showDialog(permission: String, name : String, requestCode: Int){
+
+
+    private fun showDialog(btDevice: BluetoothDevice, uuid : UUID){
         var builder = AlertDialog.Builder(this)
 
         builder.apply {
-            setMessage("Permission to access your $name is required to use this app")
-            setTitle("Permission required")
-            setPositiveButton("OK") { dialog, which ->
-                ActivityCompat.requestPermissions(this@FindFriendsActivity, arrayOf(permission), requestCode)
+            setMessage("Add a friend?")
+            setTitle("Send request")
+            setPositiveButton("Yes") { dialog, which ->
+                startBtConnection(btDevice, uuid)
             }
+            setNegativeButton("No") { dialog, which ->
+                dialog.cancel()
+            }
+
         }
         val dialog = builder.create()
         dialog.show()
     }
+
+
 }

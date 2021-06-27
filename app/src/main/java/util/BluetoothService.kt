@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -210,6 +211,8 @@ class BluetoothService {
 
         }
     }
+
+
 
 
 }
