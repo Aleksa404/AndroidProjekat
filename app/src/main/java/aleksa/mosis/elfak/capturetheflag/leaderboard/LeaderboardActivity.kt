@@ -1,5 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag.leaderboard
 
+import aleksa.mosis.elfak.capturetheflag.GuestProfileActivity
 import aleksa.mosis.elfak.capturetheflag.ProfileActivity
 import aleksa.mosis.elfak.capturetheflag.R
 import aleksa.mosis.elfak.capturetheflag.User
@@ -22,6 +23,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_leaderboard.*
+import kotlinx.android.synthetic.main.activity_profile.*
 
 class LeaderboardActivity : AppCompatActivity(), UserRecyclerAdapter.onItemClickListener {
 
@@ -88,7 +90,8 @@ class LeaderboardActivity : AppCompatActivity(), UserRecyclerAdapter.onItemClick
     override fun onItemClick(position: Int) {
         Toast.makeText(this,"item $position clicked", Toast.LENGTH_SHORT).show()
         val clickedItem = userList[position]
-        var intent = Intent(this,ProfileActivity::class.java)
+        var intent = Intent(this, GuestProfileActivity::class.java)
+        intent.putExtra("userId",userList[position].id)
         startActivity(intent)
     }
 }
