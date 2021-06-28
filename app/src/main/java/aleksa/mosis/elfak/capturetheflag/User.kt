@@ -14,6 +14,9 @@ data class User(var id : String = "",
 
 
 
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
+
     var photoUri: String = ""
     var matches : Int = 0
     var won : Int = 0
