@@ -1,5 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import aleksa.mosis.elfak.capturetheflag.myFriends.MyFriendsActivity
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -111,6 +112,10 @@ class ProfileActivity : AppCompatActivity() {
             intent.putExtra("phone",text_view_phone.text.toString())
 
             startActivityForResult(intent, 2000)
+        }
+        btn_friends.setOnClickListener{
+            val intent = Intent(this@ProfileActivity, MyFriendsActivity::class.java)
+            startActivity(intent)
         }
     }
 

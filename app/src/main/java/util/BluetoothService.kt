@@ -1,3 +1,4 @@
+import aleksa.mosis.elfak.capturetheflag.User
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothServerSocket
@@ -8,6 +9,8 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import java.io.IOException
 import java.io.InputStream
@@ -159,16 +162,18 @@ class BluetoothService {
             Log.d(TAG, "Pokrenut conected thread")
             var buffer: ByteArray = ByteArray(1024)
             var bytes: Int
-            val currentUserId = user.uid
+            var incomingMessage: String = ""
 
             while (true) {
                 try {
 
                     bytes = mmInStream!!.read(buffer)
-                    var incomingMessage: String = String(buffer, 0, bytes)
-//                    Log.d(TAG, "inputStream: " + incomingMessage)
-                    Log.d(TAG, "UserRECIVED: " + incomingMessage + "CURRENT USER: " + currentUserId)
-
+                    incomingMessage = String(buffer, 0, bytes)
+                    //Log.d(TAG, "UserRECIVED: " + incomingMessage + "CURRENT USER: " + currentUserId)
+                    if(incomingMessage != ""){
+                        Log.d(TAG, incomingMessage)
+                        addFreind(incomingMessage)
+                    }
 
                 } catch (e: IOException) {
                 }
@@ -209,6 +214,17 @@ class BluetoothService {
             mConnectedThread!!.write(bytes)
         } catch (e: IOException) {
 
+        }
+    }
+    fun addFreind(friendId : String){
+        val currentUserId = user.uid
+        val docRef = FirebaseFirestore.getInstance().collection("users").document(friendId)
+        docRef.get().addOnSuccessListener { documentSnapshot ->
+            var userObj = documentSnapshot.toObject(User::class.java)
+            userObj?.friends = ArrayList()
+            FirebaseFirestore.getInstance().collection("users").document(currentUserId).update(
+                "friends", FieldValue.arrayUnion(userObj)
+            )
         }
     }
 

@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CaptureTheFlag">
-        <activity android:name=".GuestProfileActivity"></activity>
+        <activity android:name=".myFriends.MyFriendsActivity"></activity>
+        <activity android:name=".GuestProfileActivity" />
         <activity android:name=".leaderboard.LeaderboardActivity" />
 
         <meta-data

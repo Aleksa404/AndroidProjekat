@@ -21,7 +21,7 @@ data class User(var id : String = "",
     var matches : Int = 0
     var won : Int = 0
     var flags : Int = 0
-    var friends : ArrayList<String>? = ArrayList()
+    var friends : ArrayList<User>? = ArrayList()
 
     fun addWin() {
         won++
