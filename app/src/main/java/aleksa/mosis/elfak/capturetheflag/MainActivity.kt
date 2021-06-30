@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.menu, menu)
 
         if (user != null) {
-                    spaceRef = storageRef.child("images/" + user.uid.toString())
+                    spaceRef = storageRef.child("images/" + user.uid)
 
                     val ONE_MEGABYTE: Long = 5000 * 5000
                     spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {

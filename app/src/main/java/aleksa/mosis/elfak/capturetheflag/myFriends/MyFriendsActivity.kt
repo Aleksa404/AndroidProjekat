@@ -70,18 +70,7 @@ class MyFriendsActivity : AppCompatActivity(), UserRecyclerAdapterForFriends.onI
 //    var document: DocumentSnapshot = task.getResult()
 //    var group = document["dungeon_group"] as List<String>?
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu, menu)
-        return true
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menuProfile){
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     private fun initRecyclerView(){
         recycle_view_friends.apply {
