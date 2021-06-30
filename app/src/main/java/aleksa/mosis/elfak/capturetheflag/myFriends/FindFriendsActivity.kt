@@ -1,12 +1,13 @@
-package aleksa.mosis.elfak.capturetheflag
+package aleksa.mosis.elfak.capturetheflag.myFriends
 
 import BluetoothService
+import aleksa.mosis.elfak.capturetheflag.R
+import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.*
 import android.content.ContentValues.TAG
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,8 +18,6 @@ import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -228,7 +227,7 @@ class FindFriendsActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menuProfile){
-            startActivity(Intent(this,ProfileActivity::class.java))
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
         return super.onOptionsItemSelected(item)
     }

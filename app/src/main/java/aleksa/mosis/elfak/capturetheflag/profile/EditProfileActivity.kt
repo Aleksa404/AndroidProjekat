@@ -1,12 +1,10 @@
-package aleksa.mosis.elfak.capturetheflag
+package aleksa.mosis.elfak.capturetheflag.profile
 
+import aleksa.mosis.elfak.capturetheflag.R
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.os.bundleOf
 import kotlinx.android.synthetic.main.activity_edit_profile.*
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_profile.*
 
 class EditProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,17 +1,17 @@
 package aleksa.mosis.elfak.capturetheflag
 
 import aleksa.mosis.elfak.capturetheflag.leaderboard.LeaderboardActivity
+import aleksa.mosis.elfak.capturetheflag.myFriends.FindFriendsActivity
+import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore.getInstance
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage

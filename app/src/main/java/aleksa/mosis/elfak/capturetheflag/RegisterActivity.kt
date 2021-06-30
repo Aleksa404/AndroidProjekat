@@ -1,23 +1,17 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import aleksa.mosis.elfak.capturetheflag.data.User
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore.*
 import kotlinx.android.synthetic.main.activity_register.*
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class RegisterActivity : AppCompatActivity() {

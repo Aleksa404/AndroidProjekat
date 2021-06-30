@@ -20,17 +20,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CaptureTheFlag">
         <activity android:name=".myFriends.MyFriendsActivity"></activity>
-        <activity android:name=".GuestProfileActivity" />
+        <activity android:name=".profile.GuestProfileActivity" />
         <activity android:name=".leaderboard.LeaderboardActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".FindFriendsActivity" />
-        <activity android:name=".EditProfileActivity" />
+        <activity android:name=".myFriends.FindFriendsActivity" />
+        <activity android:name=".profile.EditProfileActivity" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".profile.ProfileActivity"
             android:exported="true" />
         <activity
             android:name=".MapsActivity"

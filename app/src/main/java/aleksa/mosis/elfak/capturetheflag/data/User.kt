@@ -1,6 +1,4 @@
-package aleksa.mosis.elfak.capturetheflag
-
-import android.net.Uri
+package aleksa.mosis.elfak.capturetheflag.data
 
 
 data class User(var id : String = "",

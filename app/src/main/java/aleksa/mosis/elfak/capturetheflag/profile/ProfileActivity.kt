@@ -1,5 +1,7 @@
-package aleksa.mosis.elfak.capturetheflag
+package aleksa.mosis.elfak.capturetheflag.profile
 
+import aleksa.mosis.elfak.capturetheflag.R
+import aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.myFriends.MyFriendsActivity
 import android.Manifest
 import android.content.Intent
@@ -9,18 +11,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import com.bumptech.glide.Glide
-import com.bumptech.glide.Glide.with
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore.*
 import com.google.firebase.ktx.Firebase
@@ -28,11 +26,6 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.activity_register.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.*
 

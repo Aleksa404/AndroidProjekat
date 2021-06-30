@@ -1,12 +1,11 @@
-package aleksa.mosis.elfak.capturetheflag
+package aleksa.mosis.elfak.capturetheflag.profile
 
+import aleksa.mosis.elfak.capturetheflag.R
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference

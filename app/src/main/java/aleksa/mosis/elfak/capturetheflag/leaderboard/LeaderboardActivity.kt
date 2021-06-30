@@ -1,9 +1,9 @@
 package aleksa.mosis.elfak.capturetheflag.leaderboard
 
-import aleksa.mosis.elfak.capturetheflag.GuestProfileActivity
-import aleksa.mosis.elfak.capturetheflag.ProfileActivity
+import aleksa.mosis.elfak.capturetheflag.profile.GuestProfileActivity
+import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import aleksa.mosis.elfak.capturetheflag.R
-import aleksa.mosis.elfak.capturetheflag.User
+import aleksa.mosis.elfak.capturetheflag.data.User
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,11 +13,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.google.firebase.firestore.FirebaseFirestore.getInstance
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase

@@ -1,15 +1,17 @@
 package aleksa.mosis.elfak.capturetheflag
 
-import ClusterPerson
+import aleksa.mosis.elfak.capturetheflag.data.User
+import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Location
-import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
@@ -17,66 +19,212 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
-import com.google.maps.android.SphericalUtil
-import com.google.maps.android.clustering.ClusterManager
-import kotlinx.android.synthetic.main.activity_maps.*
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
+import com.utsman.smartmarker.moveMarkerSmoothly
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var user: FirebaseUser
+    private var auth: FirebaseAuth = Firebase.auth
+    private var user: FirebaseUser = auth.currentUser as FirebaseUser
 
+
+    private var userBitmap: Bitmap? = null
+    var storage = Firebase.storage
+    var storageRef = storage.reference
+    var spaceRef: StorageReference? = null
 
 
     private val UPDATE_FREQUENCY: Long = 30000
 
-    private lateinit var locationRequest : LocationRequest
+    private lateinit var locationRequest: LocationRequest
 
     private var latLng: LatLng? = null
 
 
     private lateinit var locationCallback: LocationCallback
-
+    private var myLocationMarker: Marker? = null
 
 
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
 
-
-    //private val mUserList: ArrayList<User> = ArrayList()
-
-    //private lateinit var lastLocation : Location
+    private var friendList: ArrayList<User> = ArrayList()
+    private var friendLocations: HashMap<String, UserLocation> = HashMap<String, UserLocation>()
 
 
-   // private lateinit var clusterManager: ClusterManager<ClusterPerson>
     private lateinit var mMap: GoogleMap
 
 
-    private fun updateGPS() {
-        if (checkPermission()) {
-            fusedLocationProviderClient!!.lastLocation.addOnSuccessListener { location ->
-                FirebaseFirestore.getInstance().collection("users").document(user.uid).update(
-                    "latitude", location.latitude,
-                    "longitude", location.longitude
-                )
-            }
-        }
-        else
-            return
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_maps)
 
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        locationRequest = LocationRequest()
+        locationRequest.interval = UPDATE_FREQUENCY
+        locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        // updateGPS()
+
+        setUpLocationCallback()
+        startLocationUpdates()
+
+        FirebaseFirestore.getInstance().collection("users").document(user.uid).get()
+            .addOnSuccessListener { ds ->
+                var me = ds.toObject(User::class.java)
+                var friends: List<User> = me?.friends as List<User>
+                friends.forEach { user ->
+
+                    friendLocations[user.id] = UserLocation(user.id, 0.0, 0.0, null)
+                    friendLocations[user.id]?.username = user.username
+
+
+                }
+                setupMap()
+
+                        //get profile pic
+//                    spaceRef = storageRef.child("images/" + user.uid.toString())
+//
+//                    val ONE_MEGABYTE: Long = 5000 * 5000
+//                    spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {
+//                        // Data for "images/island.jpg" is returned, use this as needed
+//                        userBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+//
+//
+//                    }
+                }
 
     }
-    private fun checkPermission() : Boolean{
+    private fun setUpLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+
+
+                FirebaseDatabase.getInstance().reference.child("users").child(user.uid)
+                    .setValue(
+                        GeoPoint(
+                            locationResult.lastLocation.latitude,
+                            locationResult.lastLocation.longitude
+                        )
+                    )
+               // updateMyLocationMarker(locationResult)
+
+            }
+        }
+    }
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            FirebaseDatabase.getInstance().reference.child("users").child(user.uid)
+                .setValue(GeoPoint(location.latitude, location.longitude))
+//            setupMap()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+    }
+    @SuppressLint("MissingPermission")
+    private fun setupMap(){
+
+        friendLocations.forEach {
+            FirebaseDatabase.getInstance().reference.child("users").child(it.key)
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.value == null) {
+                            return
+                        }
+                        val location: HashMap<String, Double> = snapshot.value as HashMap<String, Double>
+                        val friend = friendLocations[it.key]
+
+                        if(friend?.marker == null){
+
+
+                            var loc = LatLng(location["latitude"]!!,location["longitude"]!!)
+                            //var icon = BitmapDescriptorFactory.fromBitmap(userBitmap)
+
+                            var markerOptions = MarkerOptions().position(loc)
+                                .title(friend?.username)
+                                .snippet("Thinking of finding some thing...").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+//                                .icon(icon);
+                            val marker  = mMap.addMarker(markerOptions)
+                            friend?.latitude = location["latitude"]!!
+                            friend?.longitude = location["longitude"]!!
+                            friend?.marker = marker
+                        }
+                        friend?.marker!!.moveMarkerSmoothly( LatLng(location["latitude"]!!, location["longitude"]!!),false)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO("Not yet implemented")
+                    }
+                })
+        }
+
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopLocationUpdates()
+    }
+    private fun getFriends(){
+        FirebaseFirestore.getInstance().collection("users").document(user.uid).get().addOnSuccessListener {
+            var friendIdList = it.get("friends") as ArrayList<String>
+            friendList.forEach{ fr ->
+                Log.d(TAG, fr.username)
+            }
+        }
+    }
+    private fun moveCamera(location: LatLng,zoom: Float){
+        mMap?.animateCamera(CameraUpdateFactory.newLatLng(location))
+        mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(location, zoom))
+    }
+
+
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        enableMyLocation()
+
+    }
+
+    //Permissions
+    private val REQUEST_LOCATION_PERMISSION = 1
+
+    private fun enableMyLocation() {
+            if (checkPermission()){
+                mMap.isMyLocationEnabled = true
+            }
+            else return
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+
+    private fun checkPermission(): Boolean {
         return !(ActivityCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -85,114 +233,95 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback  {
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) != PackageManager.PERMISSION_GRANTED)
     }
-    private fun startLocationUpdates(){
+
+    private fun startLocationUpdates() {
         if (checkPermission()) {
-            fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, null)
-            updateGPS()
-        }
-        else
+            fusedLocationProviderClient!!.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                null
+            )
+            // updateGPS()
+
+
+        } else
             return
 
     }
-    private fun stopLocationUpdates(){
+
+    private fun stopLocationUpdates() {
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
+    }
+
+
+
+
+
+    private fun updateMyLocationMarker(locationResult: LocationResult){
+
+        var loc =
+            LatLng(locationResult.lastLocation.latitude, locationResult.lastLocation.longitude)
+        if(myLocationMarker == null){
+            // var icon = BitmapDescriptorFactory.fromBitmap(userBitmap)
+
+
+
+            var markerOptions = MarkerOptions().position(loc)
+                .title("Current Location")
+                .snippet("Thinking of finding some thing...")
+            // .icon(icon);
+            myLocationMarker = mMap.addMarker(markerOptions)
+
+
+        }
+        else{
+            myLocationMarker?.moveMarkerSmoothly(loc, false)
+        }
+    }
+    private fun updateGPS() {
+        if (checkPermission()) {
+            fusedLocationProviderClient!!.lastLocation.addOnSuccessListener { location ->
+                FirebaseFirestore.getInstance().collection("users").document(user.uid).update(
+                    "latitude", location.latitude,
+                    "longitude", location.longitude
+                )
+            }
+        } else
+            return
+
+
     }
 
     private fun updateUI(locationResult: LocationResult) {
         Log.d(TAG, locationResult.lastLocation.longitude.toString())
-    }
+        var loc =
+            LatLng(locationResult.lastLocation.latitude, locationResult.lastLocation.longitude)
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        //val btmDrawable = BitmapDrawable(resources, userBitmap)
+        if(userBitmap!= null){
+            // mMap.clear()
+            if(myLocationMarker == null){
+                var icon = BitmapDescriptorFactory.fromBitmap(userBitmap)
+
+                var markerOptions = MarkerOptions().position(loc)
+                    .title("Current Location")
+                    .snippet("Thinking of finding some thing...")
+                // .icon(icon);
+                myLocationMarker = mMap.addMarker(markerOptions)
 
 
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-
-                updateUI(locationResult)
-                updateGPS()
             }
-        }
-
-
-
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        locationRequest = LocationRequest()
-        locationRequest.interval = UPDATE_FREQUENCY
-        locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-        updateGPS()
-
-        startLocationUpdates()
-
-
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        auth = Firebase.auth
-        user = auth.currentUser as FirebaseUser
-        updateGPS()
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopLocationUpdates()
-    }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-
-
-        enableMyLocation()
-//
-//
-//
-//        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-//        val markerOptions = MarkerOptions().position(latLng).title("I am here!")
-//        googleMap?.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-//        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5f))
-//        googleMap?.addMarker(markerOptions)
-    }
-
-    //Permissions
-    private val REQUEST_LOCATION_PERMISSION = 1
-
-    private fun enableMyLocation() {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED)
-             {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_LOCATION_PERMISSION
-                )
-                return
+            else{
+                myLocationMarker?.moveMarkerSmoothly(loc, false)
             }
-        else {
-                mMap.isMyLocationEnabled = true
+
+
+
         }
+        moveCamera(loc, 15f)
+
+
     }
 
 }

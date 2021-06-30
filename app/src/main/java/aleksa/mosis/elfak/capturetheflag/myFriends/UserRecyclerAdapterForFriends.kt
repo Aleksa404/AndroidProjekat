@@ -1,29 +1,15 @@
 package aleksa.mosis.elfak.capturetheflag.myFriends
 
-import aleksa.mosis.elfak.capturetheflag.MainActivity
-import aleksa.mosis.elfak.capturetheflag.ProfileActivity
 import aleksa.mosis.elfak.capturetheflag.R
-import aleksa.mosis.elfak.capturetheflag.User
-import android.content.ContentValues
-import android.content.ContentValues.TAG
-import android.content.Intent
+import aleksa.mosis.elfak.capturetheflag.data.User
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.StorageException
-import com.google.firebase.storage.ktx.storage
-import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.android.synthetic.main.layout_user_list_item.view.*
-import kotlinx.android.synthetic.main.layout_user_list_item.view.txt_username
 import kotlinx.android.synthetic.main.layout_user_list_item_for_friends.view.*
 
 

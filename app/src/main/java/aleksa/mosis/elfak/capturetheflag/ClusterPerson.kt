@@ -1,5 +1,5 @@
 
-import aleksa.mosis.elfak.capturetheflag.User
+import aleksa.mosis.elfak.capturetheflag.data.User
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 

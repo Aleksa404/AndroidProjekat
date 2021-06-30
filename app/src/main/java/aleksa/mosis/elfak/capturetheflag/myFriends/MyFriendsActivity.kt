@@ -1,15 +1,13 @@
 package aleksa.mosis.elfak.capturetheflag.myFriends
 
-import aleksa.mosis.elfak.capturetheflag.GuestProfileActivity
-import aleksa.mosis.elfak.capturetheflag.ProfileActivity
+import aleksa.mosis.elfak.capturetheflag.profile.GuestProfileActivity
+import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import aleksa.mosis.elfak.capturetheflag.R
-import aleksa.mosis.elfak.capturetheflag.User
+import aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.leaderboard.SpacingItemDecoration
-import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -20,14 +18,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_leaderboard.*
-import kotlinx.android.synthetic.main.activity_leaderboard.progressBar_fetching
-import kotlinx.android.synthetic.main.activity_leaderboard.recycle_view
 import kotlinx.android.synthetic.main.activity_my_friends.*
 
 

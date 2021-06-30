@@ -1,4 +1,4 @@
-import aleksa.mosis.elfak.capturetheflag.User
+import aleksa.mosis.elfak.capturetheflag.data.User
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothServerSocket
@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothSocket
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
