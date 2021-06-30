@@ -219,18 +219,6 @@ class FindFriendsActivity : AppCompatActivity() {
 
         }
     }
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menuProfile){
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     private fun startBtConnection(device: BluetoothDevice,uuid: UUID){
 
