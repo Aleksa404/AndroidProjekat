@@ -1,6 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
-import aleksa.mosis.elfak.capturetheflag.data.User
+import  aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.Manifest
 import android.annotation.SuppressLint

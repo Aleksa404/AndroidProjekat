@@ -1,7 +1,10 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import aleksa.mosis.elfak.capturetheflag.data.Flag
 import aleksa.mosis.elfak.capturetheflag.data.Game
+import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -27,6 +31,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_new_game.*
 import kotlinx.android.synthetic.main.activity_profile.*
 import java.time.LocalTime
+import kotlin.reflect.typeOf
 import kotlin.time.ExperimentalTime
 
 
@@ -35,6 +40,7 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     private lateinit var user : FirebaseUser
+    private var markers: HashMap<String, Marker> = HashMap<String, Marker>()
 
     @ExperimentalTime
     @RequiresApi(Build.VERSION_CODES.N)
@@ -54,7 +60,6 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
         btn_generate_pass.setOnClickListener{
-            startTimer()
 
             var getStartTime = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 LocalTime.of(timePickerStart.hour, timePickerStart.minute)
@@ -62,14 +67,26 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 TODO("VERSION.SDK_INT < O")
             }
             val duration = et_duration.text.toString().toInt()
+
             val randomString = (1..10)
                     .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
                     .map(charPool::get)
                     .joinToString("");
+
+            var value : Int
+            var flagArray : ArrayList<Flag> ?= ArrayList()
+            markers.forEach { (key, marker) ->
+                if(marker.tag == "3points")
+                    value  = 3
+                else
+                    value = 5
+                val flag = Flag(latitude = marker.position.latitude , longitude = marker.position.longitude ,value = value)
+                flagArray?.add(flag)
+            }
             val docRef = FirebaseFirestore.getInstance().collection("users").document(user.uid)
             docRef.get().addOnSuccessListener { documentSnapshot ->
                     val owner = documentSnapshot.getString("username").toString()
-                    val game = Game(owner = owner, start = getStartTime, duration = duration, password = randomString)
+                    val game = Game(owner = owner, start = getStartTime, duration = duration, password = randomString,flags = flagArray)
                     FirebaseFirestore.getInstance().collection("games")
                          .document().set(game)
                     showDialog(randomString)
@@ -83,9 +100,40 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = p0
 
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+//        val sydney = LatLng(-34.0, 151.0)
+//        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        mMap.setOnMapClickListener(object :GoogleMap.OnMapClickListener {
+            override fun onMapClick(latlng :LatLng) {
+
+                // Animating to the touched position
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+
+                val location = LatLng(latlng.latitude,latlng.longitude)
+                val marker = mMap.addMarker(MarkerOptions().position(location))
+                marker.tag = "3points"
+                markers[marker.id] = marker
+            }
+        })
+        mMap.setOnMapLongClickListener(object :GoogleMap.OnMapLongClickListener {
+            override fun onMapLongClick(latlng :LatLng) {
+
+                // Animating to the touched position
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+
+                val location = LatLng(latlng.latitude,latlng.longitude)
+                val marker = mMap.addMarker(MarkerOptions().position(location))
+                markers[marker.id] = marker
+            }
+        })
+        mMap.setOnMarkerClickListener(object :GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(p0: Marker) : Boolean{
+                markers.remove(p0.id)
+                p0.remove()
+                return true
+            }
+        })
+
     }
 
     private val STORAGE_RQ = 102
@@ -100,32 +148,6 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun startTimer(){
-        //Odabrano vreme
-        val hour = timePickerStart.currentHour
-        val minute = timePickerStart.currentMinute
-        Log.d(ContentValues.TAG, "IZABRANO VREME " + hour.toString() + " " + minute.toString())
-        val milisecondsPicked = (hour * 60 + minute) * 60 * 1000
-
-        //Trenutno vreme
-        val time = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            LocalTime.now()
-        } else {
-            TODO("VERSION.SDK_INT < O")
-        }
-        Log.d(ContentValues.TAG, "TRENUTNO VREME " + time.hour.toString() + " " + time.minute.toString())
-        val milisecondsNow = (time.hour * 60 + time.minute) * 60 * 1000
-
-        //Razlika i setovanje tajmera
-        view_timer.isCountDown = true
-        if(milisecondsPicked > milisecondsNow){
-            view_timer.base = SystemClock.elapsedRealtime() + milisecondsPicked-milisecondsNow
-        }
-        else{
-            view_timer.base = SystemClock.elapsedRealtime() + 12*60*60*1000 - (milisecondsNow - milisecondsPicked)
-        }
-        view_timer.start()
-    }
     private fun showDialog(password: String){
         var builder = AlertDialog.Builder(this)
         builder.apply {

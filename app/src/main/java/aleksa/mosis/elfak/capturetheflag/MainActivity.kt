@@ -2,6 +2,7 @@ package aleksa.mosis.elfak.capturetheflag
 
 import aleksa.mosis.elfak.capturetheflag.leaderboard.LeaderboardActivity
 import aleksa.mosis.elfak.capturetheflag.myFriends.FindFriendsActivity
+import aleksa.mosis.elfak.capturetheflag.profile.EditProfileActivity
 import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,9 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -19,6 +23,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
@@ -78,6 +83,10 @@ class MainActivity : AppCompatActivity() {
         }
         btn_leaderboard.setOnClickListener {
             startActivity(Intent(this@MainActivity, LeaderboardActivity::class.java))
+        }
+        btn_join_game.setOnClickListener {
+            //startActivity(Intent(this@MainActivity, JoinGameActivity::class.java))
+            showDialogForPassword()
         }
 
 
@@ -171,5 +180,46 @@ class MainActivity : AppCompatActivity() {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+    private fun showDialogForPassword(){
+        var builder = AlertDialog.Builder(this)
+        val edittext = EditText(this)
+        edittext.setText("")
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT)
+        edittext.setLayoutParams(lp)
+        builder.apply {
+            setMessage("Join game:")
+            setTitle("Enter password:")
+            setView(edittext)
+            setPositiveButton("Confirm") { dialog, which ->
+                checkPassword(edittext.text.toString())
+            }
+            setNegativeButton("Cancel") { dialog, which ->
+                dialog.cancel()
+            }
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+    private fun checkPassword(password : String){
+        FirebaseFirestore.getInstance().collection("games")
+            .whereEqualTo("password", password)
+            .get()
+            .addOnSuccessListener { documents ->
+                if(documents.size()== 0){
+                    Toast.makeText(applicationContext, "Wrong password", Toast.LENGTH_SHORT).show()
+                }
+                else{
+                    val intent = Intent(this@MainActivity, JoinGameActivity::class.java)
+                    var pass : String = ""
+                    for (document in documents) {
+                        pass = document.getString("password").toString()
+                    }
+                    intent.putExtra("password" , pass)
+                    startActivity(intent)
+                }
+            }
     }
 }
