@@ -8,7 +8,10 @@ data class Game @ExperimentalTime constructor(
             var start : LocalTime ?= null,
             var duration : Int = 0,
             var password : String = "",
-            var flags : ArrayList<Flag> ?= ArrayList()
+            var flags : ArrayList<Flag>? = ArrayList(),
+            var players: ArrayList<User> = ArrayList(),
+            var started: Boolean = false
+
 ){
 //    var id : String = ""
 }

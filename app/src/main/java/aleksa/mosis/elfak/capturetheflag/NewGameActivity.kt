@@ -86,10 +86,16 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
             val docRef = FirebaseFirestore.getInstance().collection("users").document(user.uid)
             docRef.get().addOnSuccessListener { documentSnapshot ->
                     val owner = documentSnapshot.getString("username").toString()
-                    val game = Game(owner = owner, start = getStartTime, duration = duration, password = randomString,flags = flagArray)
+                    val game = Game(owner = owner, start = getStartTime, duration = duration,flags = flagArray)
                     FirebaseFirestore.getInstance().collection("games")
-                         .document().set(game)
-                    showDialog(randomString)
+                         .add(game).addOnSuccessListener {
+                             game.password = it.id
+                            FirebaseFirestore.getInstance().collection("games").document(it.id).update(
+                                "password" , it.id
+                            )
+                            showDialog(it.id)
+                        }
+
             }
         }
 

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Build
@@ -84,6 +85,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                         friendLocations[user.id] = UserLocation(user.id, 0.0, 0.0, null)
                         friendLocations[user.id]?.username = user.username
+                        if(user.photoUri!= ""){
+                            friendLocations[user.id]?.photoUri = user.photoUri
+                        }
+
 
 
 
@@ -114,7 +119,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-
     }
 
     @SuppressLint("MissingPermission")
@@ -131,29 +135,48 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             val location: HashMap<String, Double> = snapshot.value as HashMap<String, Double>
                             val friend = friendLocations[it.key]
 
+
+                            var loc = LatLng(location["latitude"]!!, location["longitude"]!!)
+
                             if (friend?.marker == null) {
+                                if(friend?.photoUri != ""){
+                                    spaceRef = storageRef.child("images/" + friend?.uid)
 
-                                spaceRef = storageRef.child("images/" + friend?.uid)
+                                    val ONE_MEGABYTE: Long = 5000 * 5000
+                                    spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {
+                                        // Data for "images/island.jpg" is returned, use this as needed
+                                        var imageBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
 
-                                val ONE_MEGABYTE: Long = 5000 * 5000
-                                spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {
-                                    // Data for "images/island.jpg" is returned, use this as needed
-                                    var imageBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-                                    var bmp = Bitmap.createScaledBitmap(imageBitmap, 120, 120, false)
+//                                    var drawable = BitmapDrawable(resources, imageBitmap)
+//                                    drawable.setBounds(0,0,50,50)
 
-                                    val icon = BitmapDescriptorFactory.fromBitmap(bmp)
+                                        var bmp = Bitmap.createScaledBitmap(imageBitmap, 120, 120, false)
 
-                                    var loc = LatLng(location["latitude"]!!, location["longitude"]!!)
-
-                                    var markerOptions = MarkerOptions().position(loc)
+                                        val icon = BitmapDescriptorFactory.fromBitmap(bmp)
+                                        var markerOptions = MarkerOptions().position(loc)
                                             .title(friend?.username)
 //                                            .snippet(friend?.)
                                             .icon(icon)
+
+                                        val marker = mMap.addMarker(markerOptions)
+                                        friend?.latitude = location["latitude"]!!
+                                        friend?.longitude = location["longitude"]!!
+                                        friend?.marker = marker
+                                }
+
+
+
+                                }
+                                else {
+                                    var markerOptions = MarkerOptions().position(loc)
+                                        .title(friend?.username)
+//                                            .snippet(friend?.)
 
                                     val marker = mMap.addMarker(markerOptions)
                                     friend?.latitude = location["latitude"]!!
                                     friend?.longitude = location["longitude"]!!
                                     friend?.marker = marker
+
                                 }
                             }
                             friend?.marker?.moveMarkerSmoothly(LatLng(location["latitude"]!!, location["longitude"]!!), false)
