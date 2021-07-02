@@ -7,7 +7,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
 data class UserLocation(var uid: String, var latitude: Double, var longitude: Double, var marker: Marker?) {
-    @Exclude @set:Exclude @get:Exclude  var imageBitmap: Bitmap? = null
+    @Exclude @set:Exclude @get:Exclude  var photoUri: String? = ""
     @Exclude @set:Exclude @get:Exclude  var username: String = ""
 
 
