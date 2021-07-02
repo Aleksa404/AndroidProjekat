@@ -144,7 +144,10 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
 
                 setupMap()
-                FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true)
+                FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true).addOnSuccessListener {
+                    game.started=true;
+                }
+
 
 
 
@@ -176,14 +179,18 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     )
                 var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
-                game.flags?.forEach{
-                    if(SphericalUtil.computeDistanceBetween(it.marker?.position, userLoc)<10.0){
-                        var player = game.players.filter { it -> it.id == firebaseUser.uid }
-                        player[0].flags += it.value
-                        FirebaseFirestore.getInstance().collection("games").document(pw).update(
-                            "players", FieldValue.arrayUnion(player))
+
+                if(game.started == true){
+                    game.flags?.forEach{
+                        if(SphericalUtil.computeDistanceBetween(it.marker?.position, userLoc)<10.0){
+                            var player = game.players.filter { it -> it.id == firebaseUser.uid }
+                            player[0].flags += it.value
+                            FirebaseFirestore.getInstance().collection("games").document(pw).update(
+                                "players", FieldValue.arrayUnion(player))
+                        }
                     }
                 }
+
             }
         }
     }
