@@ -177,6 +177,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     )
                 var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
                 game.flags?.forEach{
+                    println(it.marker?.position.toString() + "  "+userLoc)
                     if(SphericalUtil.computeDistanceBetween(it.marker?.position, userLoc)<10.0){
                         var player = game.players.filter { it -> it.id == firebaseUser.uid }
                         player[0].flags += it.value
@@ -303,6 +304,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             var loc = LatLng(it.latitude, it.longitude)
             var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
             it.marker = mMap.addMarker(markerOptions)
+            println("PRAVIS MARKER " + it.marker)
         }
     }
 
