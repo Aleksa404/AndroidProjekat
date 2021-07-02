@@ -16,6 +16,7 @@ import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
 import android.widget.Chronometer
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.model.Circle
@@ -144,7 +145,10 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
 
                 setupMap()
-                FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true)
+                FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true).addOnSuccessListener {
+                    game.started=true;
+                }
+
 
 
 
@@ -176,15 +180,25 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     )
                 var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
-                game.flags?.forEach{
-                    println(it.marker?.position.toString() + "  "+userLoc)
-                    if(SphericalUtil.computeDistanceBetween(it.marker?.position, userLoc)<10.0){
-                        var player = game.players.filter { it -> it.id == firebaseUser.uid }
-                        player[0].flags += it.value
-                        FirebaseFirestore.getInstance().collection("games").document(pw).update(
-                            "players", FieldValue.arrayUnion(player))
+                if(game.started == true){
+                    game.flags?.forEach{ flag->
+                        if(SphericalUtil.computeDistanceBetween(flag.marker?.position, userLoc)<10.0){
+                            var player = game.players.filter { it -> it.id == firebaseUser.uid }
+                            FirebaseFirestore.getInstance().collection("games").document(pw).update(
+                                "players", FieldValue.arrayRemove(player[0])).addOnSuccessListener {
+                                player[0].flags += flag.value
+                                FirebaseFirestore.getInstance().collection("games").document(pw).update(
+                                    "players", FieldValue.arrayUnion(player[0])
+                                )
+                                Toast.makeText(this@JoinGameActivity, "You got "+flag.value+" points!",Toast.LENGTH_SHORT).show()
+                                flag.marker?.remove()
+                                flag.radius?.remove()
+                                game.flags?.remove(flag)
+                            }
+                        }
                     }
                 }
+
             }
         }
     }
@@ -304,8 +318,9 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             var loc = LatLng(it.latitude, it.longitude)
             var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
             it.marker = mMap.addMarker(markerOptions)
-            println("PRAVIS MARKER " + it.marker)
+            it.radius = circle
         }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
