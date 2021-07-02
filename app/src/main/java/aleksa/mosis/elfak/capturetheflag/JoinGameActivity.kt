@@ -182,7 +182,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
                 if(game.started == true){
                     game.flags?.forEach{ flag->
-                        if(SphericalUtil.computeDistanceBetween(flag.marker?.position, userLoc)<10.0){
+                        if(SphericalUtil.computeDistanceBetween(flag.marker?.position, userLoc)<100.0){
                             var player = game.players.filter { it -> it.id == firebaseUser.uid }
                             FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                 "players", FieldValue.arrayRemove(player[0])).addOnSuccessListener {
@@ -313,7 +313,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         game.flags?.forEach {
             val circle: Circle = mMap.addCircle(CircleOptions()
                 .center(LatLng(it.latitude,it.longitude))
-                .radius(10.0)
+                .radius(100.0)
                 .strokeColor(Color.RED))
             var loc = LatLng(it.latitude, it.longitude)
             var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
