@@ -43,6 +43,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import com.google.maps.android.SphericalUtil
 import com.utsman.smartmarker.moveMarkerSmoothly
 import kotlinx.android.synthetic.main.activity_join_game.*
 import kotlinx.android.synthetic.main.activity_new_game.*
@@ -67,7 +68,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
     private var players: HashMap<String, User> = HashMap<String, User>()
     private var playersLocation: HashMap<String, UserLocation> = HashMap<String, UserLocation>()
-
 
     private lateinit var pw : String
     private lateinit var game : Game
@@ -168,20 +168,29 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationResult ?: return
 
 
-                FirebaseDatabase.getInstance().reference.child("players").child(firebaseUser.uid)
+                FirebaseDatabase.getInstance().reference.child("players").child(pw).child(firebaseUser.uid)
                     .setValue(
                         GeoPoint(
                             locationResult.lastLocation.latitude,
                             locationResult.lastLocation.longitude
                         )
                     )
+                var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
+                game.flags?.forEach{
+                    if(SphericalUtil.computeDistanceBetween(it.marker?.position, userLoc)<10.0){
+                        var player = game.players.filter { it -> it.id == firebaseUser.uid }
+                        player[0].flags += it.value
+                        FirebaseFirestore.getInstance().collection("games").document(pw).update(
+                            "players", FieldValue.arrayUnion(player))
+                    }
+                }
             }
         }
     }
     private fun setupMap() {
         setupFlags()
         playersLocation.forEach {
-            FirebaseDatabase.getInstance().reference.child("players").child(it.key)
+            FirebaseDatabase.getInstance().reference.child("players").child(pw).child(it.key)
                 .addValueEventListener(object : ValueEventListener {
                     @RequiresApi(Build.VERSION_CODES.KITKAT)
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -292,8 +301,8 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 .radius(10.0)
                 .strokeColor(Color.RED))
             var loc = LatLng(it.latitude, it.longitude)
-            var markerOptions = MarkerOptions().position(loc)
-            mMap.addMarker(markerOptions)
+            var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
+            it.marker = mMap.addMarker(markerOptions)
         }
     }
 

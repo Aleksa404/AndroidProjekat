@@ -110,9 +110,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                         locationResult.lastLocation.longitude
                                 )
                         )
-                //updateMyLocationMarker(locationResult)
-                //SphericalUtil.computeDistanceBetween(latLngFrom, latLngTo)
-
             }
         }
     }
