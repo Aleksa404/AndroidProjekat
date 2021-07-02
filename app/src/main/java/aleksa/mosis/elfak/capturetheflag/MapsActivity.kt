@@ -34,6 +34,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import com.google.maps.android.SphericalUtil
 import com.utsman.smartmarker.moveMarkerSmoothly
 
 
@@ -98,6 +99,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationResult ?: return
 
 
+                val circle: Circle = mMap.addCircle(CircleOptions()
+                        .center(LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude))
+                        .radius(10.0)
+                        .strokeColor(Color.RED)
+                        .fillColor(Color.BLUE))
                 FirebaseDatabase.getInstance().reference.child("users").child(user.uid)
                         .setValue(
                                 GeoPoint(
@@ -106,6 +112,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                 )
                         )
                 // updateMyLocationMarker(locationResult)
+                SphericalUtil.computeDistanceBetween(latLngFrom, latLngTo)
 
             }
         }
@@ -164,7 +171,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     })
 
         }
-
     }
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap

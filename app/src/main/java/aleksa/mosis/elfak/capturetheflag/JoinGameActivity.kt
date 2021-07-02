@@ -1,23 +1,22 @@
 package aleksa.mosis.elfak.capturetheflag
 
-import android.content.ContentValues
+import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Chronometer
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_join_game.*
 import kotlinx.android.synthetic.main.activity_new_game.*
-import java.time.LocalTime
 import java.util.*
-import kotlin.collections.HashMap
+
 
 class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
