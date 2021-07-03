@@ -1,5 +1,6 @@
 package aleksa.mosis.elfak.capturetheflag
 
+import aleksa.mosis.elfak.capturetheflag.data.Flag
 import aleksa.mosis.elfak.capturetheflag.data.Game
 import aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.data.UserLocation
@@ -54,6 +55,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
+//    inner class flagObj(var id: String, var flags: ArrayList<Flag>?){
+//
+//    }
 
     private var auth: FirebaseAuth = Firebase.auth
     private var firebaseUser: FirebaseUser = auth.currentUser as FirebaseUser
@@ -70,6 +74,8 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private var players: HashMap<String, User> = HashMap<String, User>()
     private var playersLocation: HashMap<String, UserLocation> = HashMap<String, UserLocation>()
 
+//    private var flagsList : flagObj? = null
+
     private lateinit var pw : String
     private lateinit var game : Game
     private lateinit var mMap: GoogleMap
@@ -81,7 +87,17 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         pw = intent.getStringExtra("password").toString()
         FirebaseFirestore.getInstance().collection("games").document(pw).get()
             .addOnSuccessListener { ds ->
-                game= ds.toObject(Game::class.java)!!
+                game = ds.toObject(Game::class.java)!!
+
+
+
+
+
+                    FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
+                        game?.flags
+                    )
+
+
                 startTimer()
             }
 
@@ -203,10 +219,10 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                     }
                 }
-
             }
         }
     }
+
     private fun setupMap() {
         setupFlags()
         playersLocation.forEach {
@@ -315,6 +331,39 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupFlags(){
+        FirebaseDatabase.getInstance().reference.child("flags").child(pw).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.value == null) {
+                    return
+                }
+                Log.d(TAG, snapshot.toString())
+                var hasmMapOfFlags = snapshot.value as ArrayList<Flag>
+                Log.d(TAG, hasmMapOfFlags.toString())
+
+                Log.d(TAG, game.flags.toString())
+
+               game?.flags = hasmMapOfFlags
+                Log.d(TAG, game.flags.toString())
+
+
+                //game?.flags?.clear()
+                //hasmMapOfFlags.forEach{
+              //      game?.flags?.add(it.value)
+             //   }
+                refreshFlags()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+
+
+
+
+
+    }
+    private fun refreshFlags(){
         game.flags?.forEach {
             val circle: Circle = mMap.addCircle(CircleOptions()
                 .center(LatLng(it.latitude,it.longitude))
@@ -325,7 +374,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             it.marker = mMap.addMarker(markerOptions)
             it.radius = circle
         }
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
