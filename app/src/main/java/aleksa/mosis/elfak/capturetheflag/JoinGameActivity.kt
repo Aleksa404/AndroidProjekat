@@ -179,6 +179,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                             locationResult.lastLocation.longitude
                         )
                     )
+                //proveravas CHANGED
                 var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
                 if(game.started == true){
                     game.flags?.forEach{ flag->
@@ -191,6 +192,10 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     "players", FieldValue.arrayUnion(player[0])
                                 )
                                 Toast.makeText(this@JoinGameActivity, "You got "+flag.value+" points!",Toast.LENGTH_SHORT).show()
+                                mMap.clear()
+                                //remove flag iz baze
+                                //namestas niz na novo
+                                //i opet ih crtas
                                 flag.marker?.remove()
                                 flag.radius?.remove()
                                 game.flags?.remove(flag)
