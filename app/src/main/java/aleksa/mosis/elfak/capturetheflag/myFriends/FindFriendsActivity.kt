@@ -43,8 +43,6 @@ class FindFriendsActivity : AppCompatActivity() {
     private val REQUEST_ENABLE_BLUETOOTH = 1
     private val REQUEST_DISCOVERABLE = 2
 
-
-
     private var mArrayAdapter: ArrayAdapter<String>? = null
     private var devices = ArrayList<BluetoothDevice>()
     private var devicesMap = HashMap<String, BluetoothDevice>()

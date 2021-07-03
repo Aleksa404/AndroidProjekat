@@ -2,20 +2,23 @@ package aleksa.mosis.elfak.capturetheflag
 
 import aleksa.mosis.elfak.capturetheflag.leaderboard.LeaderboardActivity
 import aleksa.mosis.elfak.capturetheflag.myFriends.FindFriendsActivity
-import aleksa.mosis.elfak.capturetheflag.profile.EditProfileActivity
 import aleksa.mosis.elfak.capturetheflag.profile.ProfileActivity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,6 +32,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_profile.*
+import java.security.AccessController.getContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         user = Firebase.auth.currentUser as FirebaseUser
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -65,12 +70,7 @@ class MainActivity : AppCompatActivity() {
         btn_map.setOnClickListener{
             startActivity(Intent(this, MapsActivity::class.java))
         }
-        btn_join_game.setOnClickListener {
-        //TODO
 
-
-
-        }
         btn_find_firends.setOnClickListener {
             startActivity(Intent(this, FindFriendsActivity::class.java))
         }
@@ -89,8 +89,27 @@ class MainActivity : AppCompatActivity() {
             showDialogForPassword()
         }
 
+            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+            val editor: SharedPreferences.Editor = prefs.edit()
 
 
+
+
+        val sw1 = findViewById<Switch>(R.id.serviceToggle)
+        sw1?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                editor.putBoolean("service", true)
+                editor.commit()
+                var service = Intent(this@MainActivity, LocationService::class.java)
+                startForegroundService(service)
+            }
+            else{
+                editor.putBoolean("service", false)
+                editor.commit()
+                var service = Intent(this@MainActivity, LocationService::class.java)
+                stopService(service)
+            }
+        }
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
@@ -110,8 +129,6 @@ class MainActivity : AppCompatActivity() {
                         // Handle any errors
                     }
         }
-
-
         return true
     }
 
@@ -136,7 +153,6 @@ class MainActivity : AppCompatActivity() {
             {
                 showDialog(permission, name, requestCode)
             }
-
         }
     }
 

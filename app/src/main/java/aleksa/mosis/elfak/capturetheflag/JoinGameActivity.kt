@@ -89,10 +89,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnSuccessListener { ds ->
                 game = ds.toObject(Game::class.java)!!
 
-
-
-
-
                     FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
                         game?.flags
                     )
@@ -164,10 +160,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true).addOnSuccessListener {
                     game.started=true;
                 }
-
-
-
-
                 //manualno ubacivanje za testiranje
 //                playersLocation["91eXv3zNfVdaZkTKTZueNtGFABJ3"] = UserLocation("91eXv3zNfVdaZkTKTZueNtGFABJ3", 0.0, 0.0,null)
 //                playersLocation["91eXv3zNfVdaZkTKTZueNtGFABJ3"]?.username = "Colj"
@@ -352,9 +344,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 TODO("Not yet implemented")
             }
         })
-
-
-
 
 
     }

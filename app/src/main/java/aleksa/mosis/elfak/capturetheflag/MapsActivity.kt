@@ -5,6 +5,7 @@ import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -12,6 +13,7 @@ import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -57,10 +59,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
-    private var myLocationMarker: Marker? = null
 
-
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -75,8 +75,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         locationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 
 
-        setUpLocationCallback()
-        startLocationUpdates()
+        var prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean("service", false)) {
+             setUpLocationCallback()
+             startLocationUpdates()
+        }
 
         FirebaseFirestore.getInstance().collection("users").document(user.uid).get()
                 .addOnSuccessListener { ds ->
@@ -89,10 +92,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         if(user.photoUri!= ""){
                             friendLocations[user.id]?.photoUri = user.photoUri
                         }
-
-
-
-
                     }
                     setupMap()
                 }
@@ -119,9 +118,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStart()
     }
 
+
     @SuppressLint("MissingPermission")
     private fun setupMap() {
-
         friendLocations.forEach {
             FirebaseDatabase.getInstance().reference.child("users").child(it.key)
                     .addValueEventListener(object : ValueEventListener {
@@ -133,7 +132,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             val location: HashMap<String, Double> = snapshot.value as HashMap<String, Double>
                             val friend = friendLocations[it.key]
 
-
                             var loc = LatLng(location["latitude"]!!, location["longitude"]!!)
 
                             if (friend?.marker == null) {
@@ -144,9 +142,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                     spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {
                                         // Data for "images/island.jpg" is returned, use this as needed
                                         var imageBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-
-//                                    var drawable = BitmapDrawable(resources, imageBitmap)
-//                                    drawable.setBounds(0,0,50,50)
 
                                         var bmp = Bitmap.createScaledBitmap(imageBitmap, 120, 120, false)
 
@@ -160,9 +155,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                         friend?.latitude = location["latitude"]!!
                                         friend?.longitude = location["longitude"]!!
                                         friend?.marker = marker
-                                }
-
-
+                                    }
 
                                 }
                                 else {
@@ -188,13 +181,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         enableMyLocation()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopLocationUpdates()
+       // stopLocationUpdates()
     }
 
 
@@ -206,7 +198,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     //Permissions
-    private val REQUEST_LOCATION_PERMISSION = 1
+
 
     private fun enableMyLocation() {
             if (checkPermission()){
@@ -218,7 +210,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-
     }
 
     private fun checkPermission(): Boolean {
