@@ -80,7 +80,7 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     value  = 3
                 else
                     value = 5
-                val flag = Flag(latitude = marker.position.latitude , longitude = marker.position.longitude ,value = value)
+                val flag = Flag(latitude = marker.position.latitude , longitude = marker.position.longitude ,value = value, marker = null, radius = null)
                 flagArray?.add(flag)
             }
             val docRef = FirebaseFirestore.getInstance().collection("users").document(user.uid)

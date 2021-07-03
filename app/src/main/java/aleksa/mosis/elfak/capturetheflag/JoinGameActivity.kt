@@ -5,7 +5,6 @@ import aleksa.mosis.elfak.capturetheflag.data.Game
 import aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.Manifest
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -13,24 +12,18 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
 import android.widget.Chronometer
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -41,7 +34,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
@@ -49,10 +41,9 @@ import com.google.maps.android.SphericalUtil
 import com.utsman.smartmarker.moveMarkerSmoothly
 import kotlinx.android.synthetic.main.activity_join_game.*
 import kotlinx.android.synthetic.main.activity_new_game.*
-import java.time.LocalTime
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+
 
 class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 //    inner class flagObj(var id: String, var flags: ArrayList<Flag>?){
@@ -79,6 +70,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var pw : String
     private lateinit var game : Game
     private lateinit var mMap: GoogleMap
+    @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,7 +80,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         FirebaseFirestore.getInstance().collection("games").document(pw).get()
             .addOnSuccessListener { ds ->
                 game = ds.toObject(Game::class.java)!!
-
                     FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
                         game?.flags
                     )
@@ -125,7 +116,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun addPlayer(){
         FirebaseFirestore.getInstance().collection("users").document(firebaseUser.uid).get()
             .addOnSuccessListener {
-                val user = User(id = it.getString("id")!!,username = it.getString("username")!!)
+                val user = User(id = it.getString("id")!!, username = it.getString("username")!!)
                 user.photoUri = it.getString("photoUri").toString()
 
                 Log.d(TAG, user!!.username)
@@ -136,6 +127,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             }
     }
 
+    @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startGame(){
         startLocationUpdates()
@@ -157,9 +149,10 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
 
                 setupMap()
-                FirebaseFirestore.getInstance().collection("games").document(pw).update("started", true).addOnSuccessListener {
-                    game.started=true;
-                }
+
+
+
+
                 //manualno ubacivanje za testiranje
 //                playersLocation["91eXv3zNfVdaZkTKTZueNtGFABJ3"] = UserLocation("91eXv3zNfVdaZkTKTZueNtGFABJ3", 0.0, 0.0,null)
 //                playersLocation["91eXv3zNfVdaZkTKTZueNtGFABJ3"]?.username = "Colj"
@@ -180,28 +173,40 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationResult ?: return
 
 
-                FirebaseDatabase.getInstance().reference.child("players").child(pw).child(firebaseUser.uid)
+                FirebaseDatabase.getInstance().reference.child("players").child(pw).child(
+                    firebaseUser.uid
+                )
                     .setValue(
                         GeoPoint(
                             locationResult.lastLocation.latitude,
                             locationResult.lastLocation.longitude
                         )
                     )
-                var userLoc : LatLng = LatLng(locationResult.lastLocation.latitude,locationResult.lastLocation.longitude)
+                //proveravas CHANGED
+                var userLoc : LatLng = LatLng(
+                    locationResult.lastLocation.latitude,
+                    locationResult.lastLocation.longitude
+                )
                 if(game.started == true){
                     game.flags?.forEach{ flag->
                         if(SphericalUtil.computeDistanceBetween(flag.marker?.position, userLoc)<100.0){
+                            game.flags?.remove(flag)
+                            FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
+                                game?.flags
+                            )
                             var player = game.players.filter { it -> it.id == firebaseUser.uid }
                             FirebaseFirestore.getInstance().collection("games").document(pw).update(
-                                "players", FieldValue.arrayRemove(player[0])).addOnSuccessListener {
+                                "players", FieldValue.arrayRemove(player[0])
+                            ).addOnSuccessListener {
                                 player[0].flags += flag.value
                                 FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                     "players", FieldValue.arrayUnion(player[0])
                                 )
-                                Toast.makeText(this@JoinGameActivity, "You got "+flag.value+" points!",Toast.LENGTH_SHORT).show()
-                                flag.marker?.remove()
-                                flag.radius?.remove()
-                                game.flags?.remove(flag)
+                                Toast.makeText(
+                                    this@JoinGameActivity,
+                                    "You got " + flag.value + " points!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -210,6 +215,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @ExperimentalStdlibApi
     private fun setupMap() {
         setupFlags()
         playersLocation.forEach {
@@ -220,13 +226,14 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         if (snapshot.value == null) {
                             return
                         }
-                        val location: HashMap<String, Double> = snapshot.value as HashMap<String, Double>
+                        val location: HashMap<String, Double> =
+                            snapshot.value as HashMap<String, Double>
                         val player = playersLocation[it.key]
 
                         var loc = LatLng(location["latitude"]!!, location["longitude"]!!)
 
                         if (player?.marker == null) {
-                            if(player?.photoUri != ""){
+                            if (player?.photoUri != "") {
                                 spaceRef = storageRef.child("images/" + player?.uid)
 
                                 val ONE_MEGABYTE: Long = 5000 * 5000
@@ -237,10 +244,14 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     // var drawable = BitmapDrawable(resources, imageBitmap)
                                     //drawable.setBounds(0,0,50,50)
 
-                                    var bmp = Bitmap.createScaledBitmap(imageBitmap, 120, 120, false)
+                                    var bmp = Bitmap.createScaledBitmap(
+                                        imageBitmap,
+                                        120,
+                                        120,
+                                        false
+                                    )
 
                                     val icon = BitmapDescriptorFactory.fromBitmap(bmp)
-
 
 
                                     var markerOptions = MarkerOptions().position(loc)
@@ -254,8 +265,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     player?.marker = marker
 
                                 }
-                            }
-                            else {
+                            } else {
                                 var markerOptions = MarkerOptions().position(loc)
                                     .title(player?.username)
 //                                            .snippet(friend?.)
@@ -268,6 +278,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                         player?.marker?.moveMarkerSmoothly(loc, false)
                     }
+
                     override fun onCancelled(error: DatabaseError) {
                         TODO("Not yet implemented")
                     }
@@ -317,42 +328,56 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationProviderClient!!.removeLocationUpdates(locationCallback)
     }
 
+    @ExperimentalStdlibApi
     private fun setupFlags(){
-        FirebaseDatabase.getInstance().reference.child("flags").child(pw).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.value == null) {
-                    return
+        FirebaseDatabase.getInstance().reference.child("flags").child(pw).addValueEventListener(
+            object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.value == null) {
+                        return
+                    }
+                    Log.d(TAG, snapshot.toString())
+                    var hashMapOfFlags = snapshot.value as ArrayList<HashMap<String,Any>>
+
+                    Log.d(TAG, hashMapOfFlags.toString())
+
+                    Log.d(TAG, game.flags.toString())
+
+                    game?.flags?.forEach{
+                        it.marker?.remove()
+                        it.radius?.remove()
+                    }
+                    game?.flags?.clear()
+                    Log.d(TAG, "SAD SI KLIROVAO NIZ = "+game.flags.toString())
+                    hashMapOfFlags.forEach{
+                        if(it!=null)
+                            game?.flags?.add(Flag(it.get("longitude").toString().toDouble(),it.get("latitude").toString().toDouble(),it.get("value").toString().toInt()))
+                       }
+                    Log.d(TAG, game.flags.toString())
+
+                    refreshFlags()
+
                 }
-                Log.d(TAG, snapshot.toString())
-                var hasmMapOfFlags = snapshot.value as ArrayList<Flag>
-                Log.d(TAG, hasmMapOfFlags.toString())
 
-                Log.d(TAG, game.flags.toString())
-
-               game?.flags = hasmMapOfFlags
-                Log.d(TAG, game.flags.toString())
-
-
-                //game?.flags?.clear()
-                //hasmMapOfFlags.forEach{
-              //      game?.flags?.add(it.value)
-             //   }
-                refreshFlags()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
-
-
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
+        FirebaseFirestore.getInstance().collection("games").document(pw).update(
+            "started",
+            true
+        ).addOnSuccessListener {
+            game.started = true;
+        }
     }
     private fun refreshFlags(){
         game.flags?.forEach {
-            val circle: Circle = mMap.addCircle(CircleOptions()
-                .center(LatLng(it.latitude,it.longitude))
-                .radius(100.0)
-                .strokeColor(Color.RED))
+            val circle: Circle = mMap.addCircle(
+                CircleOptions()
+                    .center(LatLng(it.latitude, it.longitude))
+                    .radius(100.0)
+                    .strokeColor(Color.RED)
+            )
             var loc = LatLng(it.latitude, it.longitude)
             var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
             it.marker = mMap.addMarker(markerOptions)
@@ -360,6 +385,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startTimer(){
 //        var milisecondsPicked : Long
