@@ -159,9 +159,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                                 }
                                 else {
+                                    var imageBitmap = BitmapFactory.decodeResource(resources,R.drawable.profile_icon)
+                                    var bmp = Bitmap.createScaledBitmap(
+                                            imageBitmap,
+                                            120,
+                                            120,
+                                            false
+                                    )
+                                    val icon = BitmapDescriptorFactory.fromBitmap(bmp)
                                     var markerOptions = MarkerOptions().position(loc)
-                                        .title(friend?.username)
-//                                            .snippet(friend?.)
+                                            .title(friend?.username)
+                                            .icon(icon)
 
                                     val marker = mMap.addMarker(markerOptions)
                                     friend?.latitude = location["latitude"]!!

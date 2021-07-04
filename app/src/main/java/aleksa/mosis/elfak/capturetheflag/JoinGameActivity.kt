@@ -12,11 +12,15 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
 import android.widget.Chronometer
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
@@ -42,6 +46,7 @@ import com.utsman.smartmarker.moveMarkerSmoothly
 import kotlinx.android.synthetic.main.activity_join_game.*
 import kotlinx.android.synthetic.main.activity_new_game.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
@@ -107,9 +112,9 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-//        Handler().postDelayed({
-//
-//        }, 10000)
+        Handler().postDelayed({
+            endGame()
+        }, 20000)
 
 
     }
@@ -188,16 +193,25 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                     locationResult.lastLocation.longitude
                 )
                 if(game.started == true){
-                    game.flags?.forEach{ flag->
+                    var niz = ArrayList(game.flags)
+                    niz?.forEach{ flag->
                         if(SphericalUtil.computeDistanceBetween(flag.marker?.position, userLoc)<100.0){
+                            flag.marker?.remove()
+                            flag.radius?.remove()
                             game.flags?.remove(flag)
+
                             FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
                                 game?.flags
-                            )
+                            ).addOnSuccessListener {
+                                Log.d(TAG, "1")
+                            }
+
+                            Log.d(TAG, "2")
                             var player = game.players.filter { it -> it.id == firebaseUser.uid }
                             FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                 "players", FieldValue.arrayRemove(player[0])
                             ).addOnSuccessListener {
+                                Log.d(TAG, "3")
                                 player[0].flags += flag.value
                                 FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                     "players", FieldValue.arrayUnion(player[0])
@@ -207,6 +221,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     "You got " + flag.value + " points!",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                Log.d(TAG, "4")
                             }
                         }
                     }
@@ -241,8 +256,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     // Data for "images/island.jpg" is returned, use this as needed
                                     var imageBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
 
-                                    // var drawable = BitmapDrawable(resources, imageBitmap)
-                                    //drawable.setBounds(0,0,50,50)
 
                                     var bmp = Bitmap.createScaledBitmap(
                                         imageBitmap,
@@ -266,9 +279,17 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
                                 }
                             } else {
+                                var imageBitmap = BitmapFactory.decodeResource(resources,R.drawable.profile_icon)
+                                var bmp = Bitmap.createScaledBitmap(
+                                        imageBitmap,
+                                        120,
+                                        120,
+                                        false
+                                )
+                                val icon = BitmapDescriptorFactory.fromBitmap(bmp)
                                 var markerOptions = MarkerOptions().position(loc)
                                     .title(player?.username)
-//                                            .snippet(friend?.)
+                                            .icon(icon)
 
                                 val marker = mMap.addMarker(markerOptions)
                                 player?.latitude = location["latitude"]!!
@@ -429,4 +450,49 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         view_timer.start()
 
     }
+
+    private fun endGame(){
+        FirebaseFirestore.getInstance().collection("users").document(firebaseUser.uid).get()
+                .addOnSuccessListener {
+                    var us = it.toObject(User::class.java)
+                    FirebaseFirestore.getInstance().collection("games").document(pw).get()
+                            .addOnSuccessListener { gameSnap ->
+                                var currentGame = gameSnap.toObject(Game::class.java)
+                                var winner = currentGame?.players?.maxBy{ score -> score.flags }
+                                if(winner?.id == firebaseUser.uid){
+                                    us?.flags = us?.flags?.plus(winner.flags)!!
+                                    us.addWin()
+                                    FirebaseFirestore.getInstance().collection("users").document(firebaseUser.uid).update(
+                                            "flags",us?.flags,
+                                    "won", us.won
+                                    )
+                                    showEndGameDialog(us?.flags)
+                                }
+                                else {
+                                    var us2 = currentGame?.players?.filter { usr -> usr.id == us?.id}
+                                    var score = us2?.get(0)?.flags!!.toInt()
+                                    us?.flags = us?.flags?.plus(score)!!
+                                    FirebaseFirestore.getInstance().collection("users").document(firebaseUser.uid).update(
+                                            "flags",us?.flags
+                                    )
+                                    showEndGameDialog(us?.flags)
+                                }
+                            }
+        }
+    }
+
+    private fun showEndGameDialog(score: Int){
+        var builder = AlertDialog.Builder(this)
+        builder.apply {
+            setMessage("Score: $score")
+            setTitle("Game over")
+            setPositiveButton("Confirm") { dialog, which ->
+                finish()
+            }
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+
 }

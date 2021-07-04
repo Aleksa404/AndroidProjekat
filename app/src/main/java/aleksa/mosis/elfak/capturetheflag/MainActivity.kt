@@ -89,10 +89,11 @@ class MainActivity : AppCompatActivity() {
             showDialogForPassword()
         }
 
-            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-            val editor: SharedPreferences.Editor = prefs.edit()
 
 
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor: SharedPreferences.Editor = prefs.edit()
 
 
         val sw1 = findViewById<Switch>(R.id.serviceToggle)
@@ -219,23 +220,36 @@ class MainActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.show()
     }
-    private fun checkPassword(password : String){
+    private fun checkPassword(password : String) {
         FirebaseFirestore.getInstance().collection("games")
-            .whereEqualTo("password", password)
-            .get()
-            .addOnSuccessListener { documents ->
-                if(documents.size()== 0){
-                    Toast.makeText(applicationContext, "Wrong password", Toast.LENGTH_SHORT).show()
-                }
-                else{
-                    val intent = Intent(this@MainActivity, JoinGameActivity::class.java)
-                    var pass : String = ""
-                    for (document in documents) {
-                        pass = document.getString("password").toString()
+                .whereEqualTo("password", password)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.size() == 0) {
+                        Toast.makeText(applicationContext, "Wrong password", Toast.LENGTH_SHORT).show()
+                    } else {
+                        for (document in documents) {
+                            var started = document.getBoolean("started")
+                            if (started == false) {
+                                val intent = Intent(this@MainActivity, JoinGameActivity::class.java)
+                                var pass: String = ""
+                                pass = document.getString("password").toString()
+                                intent.putExtra("password", pass)
+                                startActivity(intent)
+                            } else {
+                                var builder = AlertDialog.Builder(this)
+
+                                builder.apply {
+//                                setMessage("Permission to access your $name is required to use this app")
+                                    setTitle("Game already started").setPositiveButton("OK"){ _, _ -> }
+                                }
+                                val dialog = builder.create()
+                                dialog.show()
+                            }
+
+
+                        }
                     }
-                    intent.putExtra("password" , pass)
-                    startActivity(intent)
                 }
-            }
     }
 }
