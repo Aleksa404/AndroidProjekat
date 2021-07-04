@@ -15,6 +15,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.widget.Chronometer
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -75,6 +77,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var pw : String
     private lateinit var game : Game
     private lateinit var mMap: GoogleMap
+    private var filter : String = "All"
     @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,8 +110,20 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
         setUpLocationCallback()
         startLocationUpdates()
 
-
         addPlayer()
+
+        btn_all.setOnClickListener{
+            filter = "All"
+            checkFilter()
+        }
+        btn_3p.setOnClickListener{
+            filter = "3p"
+            checkFilter()
+        }
+        btn_5p.setOnClickListener{
+            filter = "5p"
+            checkFilter()
+        }
 
 
 
@@ -213,6 +228,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                             ).addOnSuccessListener {
                                 Log.d(TAG, "3")
                                 player[0].flags += flag.value
+                                text_view_score.setText(text_view_score.text.toString().toInt() + flag.value)
                                 FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                     "players", FieldValue.arrayUnion(player[0])
                                 )
@@ -355,28 +371,27 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.value == null) {
+                        //ZOVES ENDGAME
                         return
                     }
                     Log.d(TAG, snapshot.toString())
-                    var hashMapOfFlags = snapshot.value as ArrayList<HashMap<String,Any>>
+                        var hashMapOfFlags = snapshot.value as ArrayList<HashMap<String,Any>>
+                        Log.d(TAG, hashMapOfFlags.toString())
+                        Log.d(TAG, game.flags.toString())
+                        game?.flags?.forEach{
+                            it.marker?.remove()
+                            it.radius?.remove()
+                        }
+                        game?.flags?.clear()
+                        Log.d(TAG, "SAD SI KLIROVAO NIZ = "+game.flags.toString())
 
-                    Log.d(TAG, hashMapOfFlags.toString())
+                        hashMapOfFlags.forEach{
+                            if(it!=null)
+                                game?.flags?.add(Flag(it.get("longitude").toString().toDouble(),it.get("latitude").toString().toDouble(),it.get("value").toString().toInt()))
+                        }
+                        Log.d(TAG, game.flags.toString())
 
-                    Log.d(TAG, game.flags.toString())
-
-                    game?.flags?.forEach{
-                        it.marker?.remove()
-                        it.radius?.remove()
-                    }
-                    game?.flags?.clear()
-                    Log.d(TAG, "SAD SI KLIROVAO NIZ = "+game.flags.toString())
-                    hashMapOfFlags.forEach{
-                        if(it!=null)
-                            game?.flags?.add(Flag(it.get("longitude").toString().toDouble(),it.get("latitude").toString().toDouble(),it.get("value").toString().toInt()))
-                       }
-                    Log.d(TAG, game.flags.toString())
-
-                    refreshFlags()
+                        refreshFlags()
 
                 }
 
@@ -389,22 +404,56 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             true
         ).addOnSuccessListener {
             game.started = true;
+            btn_all.visibility = VISIBLE
+            btn_3p.visibility = VISIBLE
+            btn_5p.visibility = VISIBLE
         }
     }
     private fun refreshFlags(){
-        game.flags?.forEach {
-            val circle: Circle = mMap.addCircle(
-                CircleOptions()
-                    .center(LatLng(it.latitude, it.longitude))
-                    .radius(100.0)
-                    .strokeColor(Color.RED)
-            )
+        game?.flags?.forEach {
+
             var loc = LatLng(it.latitude, it.longitude)
-            var markerOptions = MarkerOptions().position(loc).title(it.value.toString())
+            val circle: Circle
+            var markerOptions : MarkerOptions
+            if(it.value.toString() == "5"){
+                markerOptions = MarkerOptions().position(loc).title(it.value.toString()).icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                circle = mMap.addCircle(
+                    CircleOptions()
+                        .center(LatLng(it.latitude, it.longitude))
+                        .radius(100.0)
+                        .strokeColor(Color.BLUE))
+            }
+            else{
+                markerOptions = MarkerOptions().position(loc).title(it.value.toString()).icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                circle = mMap.addCircle(
+                    CircleOptions()
+                        .center(LatLng(it.latitude, it.longitude))
+                        .radius(100.0)
+                        .strokeColor(Color.RED))
+            }
             it.marker = mMap.addMarker(markerOptions)
             it.radius = circle
         }
+        checkFilter()
     }
+    fun checkFilter(){
+            game?.flags?.forEach {
+                it.marker?.isVisible = true
+                it.radius?.isVisible = true
+                if(filter == "3p" && it.value!=3){
+                    it.marker?.isVisible = false
+                    it.radius?.isVisible = false
+                }
+                if(filter == "5p" && it.value!=5){
+                    it.marker?.isVisible = false
+                    it.radius?.isVisible = false
+                }
+            }
+        }
+
+
 
     @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
@@ -444,6 +493,8 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             if (timeElapsed >= 0) {
                 println("ISTEKLO")
                 view_timer.stop()
+                view_timer.visibility=INVISIBLE
+                text_view_text_for_timer.visibility= INVISIBLE
                 startGame()
             }
         }
