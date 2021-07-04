@@ -85,7 +85,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity, LeaderboardActivity::class.java))
         }
         btn_join_game.setOnClickListener {
-            //startActivity(Intent(this@MainActivity, JoinGameActivity::class.java))
             showDialogForPassword()
         }
 
@@ -156,30 +155,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//
-//
-//        fun innerCheck(name: String) {
-//            if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(applicationContext, "$name permission refused", Toast.LENGTH_SHORT).show()
-//            } else {
-//                Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//
-//        when (requestCode) {
-//            FINE_LOCATION_RQ -> innerCheck("location")
-//            STORAGE_RQ -> innerCheck("Storage")
-//        }
-
-
-//    }
 
     private fun showDialog(permission: String, name: String, requestCode: Int){
         var builder = AlertDialog.Builder(this)

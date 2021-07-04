@@ -59,7 +59,7 @@ class MyFriendsActivity : AppCompatActivity(), UserRecyclerAdapterForFriends.onI
                 mArrayAdapter!!.add(user.username)
                 userList.add(user)
             }
-//            leaderboard_list.adapter = mArrayAdapter
+
             progressBar_fetching_friends.visibility = View.GONE
             initRecyclerView()
             userAdapter.submitList(userList)
@@ -67,8 +67,6 @@ class MyFriendsActivity : AppCompatActivity(), UserRecyclerAdapterForFriends.onI
 
 
     }
-//    var document: DocumentSnapshot = task.getResult()
-//    var group = document["dungeon_group"] as List<String>?
 
 
 

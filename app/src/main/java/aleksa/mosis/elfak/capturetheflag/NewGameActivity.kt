@@ -49,9 +49,6 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_new_game)
         user = Firebase.auth.currentUser as FirebaseUser
 
-//        val mapFragment = supportFragmentManager
-//            .findFragmentById(R.id.map) as SupportMapFragment
-//        mapFragment.getMapAsync()
 
 
         var mapFragment = supportFragmentManager
@@ -107,10 +104,6 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(p0: GoogleMap) {
         mMap = p0
 
-        // Add a marker in Sydney and move the camera
-//        val sydney = LatLng(-34.0, 151.0)
-//        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
         mMap.setOnMapClickListener(object :GoogleMap.OnMapClickListener {
             override fun onMapClick(latlng :LatLng) {
 
@@ -144,7 +137,7 @@ class NewGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    private val STORAGE_RQ = 102
+
 
     private fun requestPermission(permission: String, name: String, requestCode: Int){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

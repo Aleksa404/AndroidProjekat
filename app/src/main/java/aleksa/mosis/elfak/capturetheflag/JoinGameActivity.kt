@@ -53,9 +53,7 @@ import kotlin.collections.HashMap
 
 
 class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
-//    inner class flagObj(var id: String, var flags: ArrayList<Flag>?){
-//
-//    }
+
 
     private var auth: FirebaseAuth = Firebase.auth
     private var firebaseUser: FirebaseUser = auth.currentUser as FirebaseUser
@@ -139,7 +137,6 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                 val user = User(id = it.getString("id")!!, username = it.getString("username")!!)
                 user.photoUri = it.getString("photoUri").toString()
 
-                Log.d(TAG, user!!.username)
 
                 FirebaseFirestore.getInstance().collection("games")
                     .document(pw).update("players", FieldValue.arrayUnion(user))
@@ -217,16 +214,13 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
                             FirebaseDatabase.getInstance().reference.child("flags").child(pw).setValue(
                                 game?.flags
-                            ).addOnSuccessListener {
-                                Log.d(TAG, "1")
-                            }
+                            )
 
-                            Log.d(TAG, "2")
+
                             var player = game.players.filter { it -> it.id == firebaseUser.uid }
                             FirebaseFirestore.getInstance().collection("games").document(pw).update(
                                 "players", FieldValue.arrayRemove(player[0])
                             ).addOnSuccessListener {
-                                Log.d(TAG, "3")
                                 player[0].flags += flag.value
                                 text_view_score.setText(text_view_score.text.toString().toInt() + flag.value)
                                 FirebaseFirestore.getInstance().collection("games").document(pw).update(
@@ -237,7 +231,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                                     "You got " + flag.value + " points!",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                Log.d(TAG, "4")
+
                             }
                         }
                     }
@@ -374,22 +368,21 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
                         //ZOVES ENDGAME
                         return
                     }
-                    Log.d(TAG, snapshot.toString())
+
                         var hashMapOfFlags = snapshot.value as ArrayList<HashMap<String,Any>>
-                        Log.d(TAG, hashMapOfFlags.toString())
-                        Log.d(TAG, game.flags.toString())
+
                         game?.flags?.forEach{
                             it.marker?.remove()
                             it.radius?.remove()
                         }
                         game?.flags?.clear()
-                        Log.d(TAG, "SAD SI KLIROVAO NIZ = "+game.flags.toString())
+
 
                         hashMapOfFlags.forEach{
                             if(it!=null)
                                 game?.flags?.add(Flag(it.get("longitude").toString().toDouble(),it.get("latitude").toString().toDouble(),it.get("value").toString().toInt()))
                         }
-                        Log.d(TAG, game.flags.toString())
+
 
                         refreshFlags()
 
@@ -540,6 +533,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             setPositiveButton("Confirm") { dialog, which ->
                 finish()
             }
+            setCancelable(false)
         }
         val dialog = builder.create()
         dialog.show()

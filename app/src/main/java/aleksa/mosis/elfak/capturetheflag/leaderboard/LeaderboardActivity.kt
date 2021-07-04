@@ -53,7 +53,6 @@ class LeaderboardActivity : AppCompatActivity(), UserRecyclerAdapter.onItemClick
                 mArrayAdapter!!.add(us.username)
                 userList.add(us)
             }
-//            leaderboard_list.adapter = mArrayAdapter
             progressBar_fetching.visibility = View.GONE
             initRecyclerView()
             userAdapter.submitList(userList)

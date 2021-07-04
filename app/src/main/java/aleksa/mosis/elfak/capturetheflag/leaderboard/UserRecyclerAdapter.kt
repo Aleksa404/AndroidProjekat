@@ -63,7 +63,7 @@ class UserRecyclerAdapter(private val listener: LeaderboardActivity) : RecyclerV
 
         fun bind(user: User){
             userUsername.setText(user.username)
-            userFlags.setText("Flaggs: " +  user.flags.toString())
+            userFlags.setText("Flags: " +  user.flags.toString())
 
 
             if(user.photoUri != "") {

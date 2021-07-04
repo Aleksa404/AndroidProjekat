@@ -121,7 +121,6 @@ class FindFriendsActivity : AppCompatActivity() {
             showDialog(btDevicePaired!!, uuid)
 
 
-            Log.d(TAG, btDevicePaired!!.name)
 
         }
         select_device_list.setOnItemClickListener { _, _, position: Int, _ ->
@@ -202,7 +201,6 @@ class FindFriendsActivity : AppCompatActivity() {
         if(requestCode == REQUEST_ENABLE_BLUETOOTH) {
             if(resultCode == Activity.RESULT_OK){
                 if(bluetoothAdapter!!.isEnabled){
-                    Log.d(TAG,"OVDE SAM")
                     //enabled
 
                 }
@@ -225,7 +223,6 @@ class FindFriendsActivity : AppCompatActivity() {
 
 
     private fun startClient(device: BluetoothDevice, uuid: UUID){
-        Log.d(TAG, "start client: STARTED")
         var user = Firebase.auth.currentUser as FirebaseUser
 
 

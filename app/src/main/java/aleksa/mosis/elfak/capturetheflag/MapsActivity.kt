@@ -140,7 +140,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                                     val ONE_MEGABYTE: Long = 5000 * 5000
                                     spaceRef?.getBytes(ONE_MEGABYTE)?.addOnSuccessListener {
-                                        // Data for "images/island.jpg" is returned, use this as needed
                                         var imageBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
 
                                         var bmp = Bitmap.createScaledBitmap(imageBitmap, 120, 120, false)
@@ -148,7 +147,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                         val icon = BitmapDescriptorFactory.fromBitmap(bmp)
                                         var markerOptions = MarkerOptions().position(loc)
                                             .title(friend?.username)
-//                                            .snippet(friend?.)
                                             .icon(icon)
 
                                         val marker = mMap.addMarker(markerOptions)

@@ -12,6 +12,5 @@ data class Game @ExperimentalTime constructor(
             var started: Boolean = false
 
 ){
-//    var id : String = ""
       var start : HashMap<String, Int> = HashMap()
 }

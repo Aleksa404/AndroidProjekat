@@ -57,16 +57,6 @@ class RegisterActivity : AppCompatActivity() {
                                     .document(firebaseUser.uid).set(user)
 
 
-//                                val users : HashMap<String, Any> = HashMap()
-//                                user.put("Name", user)
-//                                documentReference.set(user).addOnSuccessListener {
-//                                    Toast.makeText(
-//                                        this@RegisterActivity, "Created user with id: "+firebaseUser.uid, Toast.LENGTH_SHORT)
-//                                        .show()
-//                                }
-
-
-
 
                                 val intent = Intent(this@RegisterActivity, MainActivity::class.java)
                                 intent.flags =

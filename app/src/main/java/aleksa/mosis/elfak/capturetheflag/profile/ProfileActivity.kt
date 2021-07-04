@@ -59,22 +59,11 @@ class ProfileActivity : AppCompatActivity() {
                  text_view_matches.text = documentSnapshot.getLong("matches").toString()
                  text_view_flags.text = documentSnapshot.getLong("flags").toString()
                  text_view_won.text = documentSnapshot.getLong("won").toString()
-//                 var task = storageRef.child("images/"+user.uid.toString()).downloadUrl.addOnCompleteListener{ task ->
-//                         if (task.isSuccessful) {
-//                             val downloadUri = task.result
-//                             Glide.with(this).load(downloadUri).centerCrop().override(512, 512).into(profile_image);
-//                         } else {
-//                             Toast.makeText(this@ProfileActivity, "Couldn't find image",
-//                                 Toast.LENGTH_LONG).show()
-//                             profile_image.setImageURI(Uri.parse("android.resource://$packageName/${R.drawable.profile_icon}"))
-//                         }
-//                 }
+
                  val photo = documentSnapshot.getString("photoUri")
                  if (photo != "") {
                      Glide.with(this).load(photo).centerCrop().override(512, 512).into(profile_image);
                  } else {
-                     Toast.makeText(this@ProfileActivity, "Couldn't find image",
-                         Toast.LENGTH_LONG).show()
                      profile_image.setImageURI(Uri.parse("android.resource://$packageName/${R.drawable.profile_icon}"))
                  }
 
@@ -159,10 +148,7 @@ class ProfileActivity : AppCompatActivity() {
             text_view_name.text.toString(),
             text_view_surname.text.toString(),
             text_view_phone.text.toString())
-//        obj.matches = text_view_matches.text.toString().toInt()
-//        obj.won = text_view_won.text.toString().toInt()
-//        obj.flags = text_view_flags.text.toString().toInt()
-        obj.addFlag()
+
 
         getInstance().collection("users").document(user.uid).update(
         "username", obj.username,
