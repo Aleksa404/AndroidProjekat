@@ -14,12 +14,83 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".JoinGameActivity" />
+
     <Chronometer
         android:id="@+id/view_timer"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="182dp"
-        tools:layout_editor_absoluteY="696dp"
+        android:textColor="#FF0000"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/gameMap"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/text_view_text_for_timer"
+        app:layout_constraintTop_toTopOf="@+id/gameMap"
         tools:targetApi="24" />
+
+    <TextView
+        android:id="@+id/text_view_text_for_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Game starts in:"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/gameMap"
+        app:layout_constraintHorizontal_bias="0.35"
+        app:layout_constraintStart_toStartOf="@+id/gameMap"
+        app:layout_constraintTop_toTopOf="@+id/gameMap" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Score:"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/gameMap"
+        app:layout_constraintTop_toTopOf="@+id/gameMap" />
+
+    <TextView
+        android:id="@+id/text_view_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textColor="#FF0000"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/gameMap"
+        app:layout_constraintHorizontal_bias="0.01"
+        app:layout_constraintStart_toEndOf="@+id/textView6"
+        app:layout_constraintTop_toTopOf="@+id/gameMap" />
+
+    <Button
+        android:id="@+id/btn_all"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:text="All"
+        android:textSize="9sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/gameMap"
+        app:layout_constraintEnd_toStartOf="@+id/btn_3p"
+        app:layout_constraintStart_toStartOf="@+id/gameMap" />
+
+    <Button
+        android:id="@+id/btn_3p"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:text="3 points"
+        android:textSize="9sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/gameMap"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/gameMap" />
+
+    <Button
+        android:id="@+id/btn_5p"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:text="5 points"
+        android:textSize="9sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/gameMap"
+        app:layout_constraintEnd_toEndOf="@+id/gameMap"
+        app:layout_constraintStart_toEndOf="@+id/btn_3p" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 
