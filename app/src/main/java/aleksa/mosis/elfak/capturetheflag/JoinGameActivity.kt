@@ -5,6 +5,7 @@ import aleksa.mosis.elfak.capturetheflag.data.Game
 import aleksa.mosis.elfak.capturetheflag.data.User
 import aleksa.mosis.elfak.capturetheflag.data.UserLocation
 import android.Manifest
+import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -47,6 +48,7 @@ import com.google.maps.android.SphericalUtil
 import com.utsman.smartmarker.moveMarkerSmoothly
 import kotlinx.android.synthetic.main.activity_join_game.*
 import kotlinx.android.synthetic.main.activity_new_game.*
+import java.time.LocalTime
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -125,9 +127,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-        Handler().postDelayed({
-            endGame()
-        }, 20000)
+
 
 
     }
@@ -365,7 +365,7 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.value == null) {
-                        //ZOVES ENDGAME
+                        endGame()
                         return
                     }
 
@@ -451,8 +451,8 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
     @ExperimentalStdlibApi
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startTimer(){
-//        var milisecondsPicked : Long
-//        //Odabrano vreme
+        var milisecondsPicked : Long
+        //Odabrano vreme
 //                val hour = game.start["hour"]
 //                val minute = game.start["minute"]
 //                Log.d(ContentValues.TAG, "IZABRANO VREME " + hour.toString() + " " + minute.toString())
@@ -480,18 +480,35 @@ class JoinGameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         view_timer.isCountDown = true
         view_timer.base = SystemClock.elapsedRealtime() + 5000
+        view_timer.start()
 
         view_timer.onChronometerTickListener = Chronometer.OnChronometerTickListener { chronometer ->
             val timeElapsed = SystemClock.elapsedRealtime() - chronometer.base
+            println(timeElapsed)
             if (timeElapsed >= 0) {
-                println("ISTEKLO")
                 view_timer.stop()
                 view_timer.visibility=INVISIBLE
-                text_view_text_for_timer.visibility= INVISIBLE
                 startGame()
+                text_view_text_for_timer.setText("Game ends in: ")
+                view_timer2.visibility = VISIBLE
+                view_timer2.start()
             }
         }
-        view_timer.start()
+
+        view_timer2.isCountDown = true
+        view_timer2.base = view_timer.base + game.duration.toLong() * 60 * 1000
+
+        view_timer2.onChronometerTickListener = Chronometer.OnChronometerTickListener { chronometer ->
+            val timeElapsed = SystemClock.elapsedRealtime() - chronometer.base
+            println(timeElapsed)
+            if (timeElapsed >= 0) {
+                view_timer2.stop()
+                view_timer2.visibility=INVISIBLE
+                text_view_text_for_timer.visibility= INVISIBLE
+                endGame()
+            }
+        }
+
 
     }
 
